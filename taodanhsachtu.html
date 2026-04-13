@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Tạo danh sách</title>
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
+<style>
+	*{box-sizing:border-box;margin:0;padding:0;}
+
+
+	body{
+		margin:0;
+		overflow:hidden;
+		font-family:sans-serif;
+		background-image:url("nen1.png");
+		background-size:cover;
+		background-position:center;
+		background-repeat:no-repeat;}
+
+
+	.overlay{
+		position:fixed;
+		inset:0;
+		background:rgba(0,0,0,0.25);
+		z-index:-1;}
+
+
+	.app-container{
+		max-width:375px;
+		margin:auto;
+		height:100vh;
+		display:flex;
+		justify-content:center;
+		align-items:center;
+		padding-top:env(safe-area-inset-top);
+		padding-bottom:env(safe-area-inset-bottom);
+		padding-left:10px;
+		padding-right:10px;}
+
+	.card-1{
+		width:100%;
+		height:600px;
+		border-radius:20px;
+		background:transparent;
+		display:flex;
+		justify-content:center;
+		align-items:flex-start;
+		transform:translateY(-30px);}
+
+
+	.card-2{
+		width:300px;
+		height:250px;
+		padding:15px;
+		margin-top:0px;
+		border-radius:20px;
+		position:relative;
+		box-shadow:0 8px 20px rgba(0,0,0,0.3);
+		display:flex;
+		flex-direction:column;
+		gap:10px;}
+
+
+
+
+	.group-name input{
+		display: block;
+  		width:70%;
+		margin:0 auto;
+		text-align: center;
+  		height:40px;
+  		padding:8px;
+  		border-radius:12px;
+  		border:1px solid #ddd;}
+
+
+
+	.group-en textarea{
+  		width:100%;
+  		min-height:50px;
+  		border-radius:12px;
+  		padding:10px;
+  		border:1px solid #ddd;}
+
+
+
+
+	.group-vi textarea{
+  		width:100%;
+  		min-height:50px;
+  		border-radius:12px;
+  		padding:10px;
+  		border:1px solid #ddd;}
+
+
+
+
+	textarea {
+  		min-height: 100px;
+  		max-height: 140px;
+  		resize: vertical;}
+
+
+
+
+	.btn {
+  		width: 60%;
+		margin: 10px auto 0;
+  		padding: 10px;
+  		border-radius: 15px;
+  		border: none;
+  		font-weight: 600;
+  		cursor: pointer;
+  		background: gainsboro;
+  		transition: all 0.15s ease;
+  		font-size: 15px;
+  		color: #555;
+  		margin-top: 0px;}
+	.btn:hover {
+  		filter: brightness(0.95);
+  		transform: translateY(-2px);}
+	.btn:active {
+  		transform: scale(0.97);
+  		filter: brightness(0.9);}
+
+
+
+
+	#saveMessage {
+  		position: fixed;
+  		top: 0;
+  		left: 0;
+  		width: 100%;
+  		height: 100%;
+  		display: none;
+  		justify-content: center;
+  		align-items: center;
+  		background: rgba(0,0,0,0.3);
+  		z-index: 999;}
+
+
+
+
+	.saved-box {
+  		padding: 20px 30px;
+  		border-radius: 15px;
+  		background: white;
+  		font-size: 16px;
+  		font-weight: 600;
+  		color: #065f46;
+  		box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  		animation: pop 0.3s ease;}
+
+
+
+
+	@keyframes pop{
+  		from{transform: scale(0.8);opacity: 0;}
+  		to{transform: scale(1);opacity: 1;}}
+
+
+
+
+</style>
+</head>
+<body>
+	<div class="overlay"></div>
+		<div class="app-container">
+		<div class="card-1">
+			<div class="card-2">
+  				<div class="group-name"><input type="text" id="listName" placeholder="Tên danh sách"></div>
+  				<div class="group-en"><textarea id="englishWords" placeholder="Từ tiếng Anh"></textarea></div>
+  				<div class="group-vi"><textarea id="vietnameseWords" placeholder="Nghĩa tiếng Việt"></textarea></div>
+  				<button class="btn" onclick="saveList()">Lưu danh sách</button>
+			</div>
+	</div>
+	</div>
+
+
+
+	<div id="saveMessage">
+  		<div class="saved-box">✅ Đã lưu danh sách!</div>
+		</div>
+
+
+
+<script>
+	let editIndex = localStorage.getItem("editIndex");
+	if(editIndex !== null){
+	let allLists = JSON.parse(localStorage.getItem('wordLists') || '[]');
+	let list = allLists[editIndex];
+
+	if(list){
+		document.getElementById('listName').value = list.name;
+		document.getElementById('englishWords').value =
+			list.words.map(w => w.en).join("\n");
+		document.getElementById('vietnameseWords').value =
+			list.words.map(w => w.vi).join("\n");}}
+
+
+
+	function saveList(){
+  		const name = document.getElementById('listName').value.trim();
+  		const en = document.getElementById('englishWords').value.trim().split('\n');
+  		const vi = document.getElementById('vietnameseWords').value.trim().split('\n');
+  		if(!name){alert("Vui lòng nhập tên danh sách");return;}
+		if(en.length !== vi.length){alert("Số dòng không khớp!");return;}
+  		let result = [];
+  		for(let i = 0; i < en.length; i++){
+    		result.push({ en: en[i], vi: vi[i] });}
+  		let allLists = JSON.parse(localStorage.getItem('wordLists') || '[]');
+  		if(editIndex !== null){
+		allLists[editIndex] = { name: name, words: result };
+		localStorage.removeItem("editIndex");} 
+		else {
+		allLists.push({ name: name, words: result });
+		localStorage.setItem('wordLists', JSON.stringify(allLists));}
+
+  		const msg = document.getElementById('saveMessage');
+  		msg.style.display = 'flex';
+
+  		setTimeout(() => {
+    		window.location.href = "index.html";}, 2000);}
+
+</script>
+</body>
+</html>

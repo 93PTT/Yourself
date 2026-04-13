@@ -54,7 +54,7 @@
 
 	.card-2{
 		width:300px;
-		height:250px;
+		height:260px;
 		padding:15px;
 		margin-top:0px;
 		border-radius:20px;
@@ -62,8 +62,22 @@
 		box-shadow:0 8px 20px rgba(0,0,0,0.3);
 		display:flex;
 		flex-direction:column;
-		gap:10px;}
+		gap:20px;}
 
+
+
+	.group-en textarea,
+	.group-vi textarea{
+  		transition: all 0.25s ease;
+  		position: relative;}
+
+
+
+	textarea.expanded{
+  		height:55vh !important;
+  		max-height:none !important;
+  		z-index:10;
+  		transform:scale(1.02);}
 
 
 
@@ -75,34 +89,42 @@
   		height:40px;
   		padding:8px;
   		border-radius:12px;
-  		border:1px solid #ddd;}
+  		border:1px solid #ddd;
+		font-size: 15px;}
 
 
 
 	.group-en textarea{
   		width:100%;
-  		min-height:50px;
+  		height:40px;
+  		padding:8px;
   		border-radius:12px;
-  		padding:10px;
-  		border:1px solid #ddd;}
+  		border:1px solid #ddd;
+  		font-size:15px;
+  		resize:none;
+  		transition: all 0.25s ease;}
 
 
 
 
 	.group-vi textarea{
   		width:100%;
-  		min-height:50px;
+  		height:40px;
+  		padding:8px;
   		border-radius:12px;
-  		padding:10px;
-  		border:1px solid #ddd;}
-
+  		border:1px solid #ddd;
+  		font-size:15px;
+  		resize:none;
+  		transition: all 0.25s ease;}
+		
 
 
 
 	textarea {
-  		min-height: 100px;
-  		max-height: 140px;
-  		resize: vertical;}
+  		min-height: 40px;
+  		max-height: none;
+  		resize: none;
+  		transition: all 0.25s ease;}
 
 
 
@@ -225,6 +247,22 @@
 
   		setTimeout(() => {
     		window.location.href = "index.html";}, 2000);}
+
+
+	const textareas = document.querySelectorAll("textarea");
+
+	textareas.forEach(el => {
+  	el.addEventListener("focus", () => {
+
+    	textareas.forEach(t => t.classList.remove("expanded"));
+
+
+    	el.classList.add("expanded");});});
+
+
+	document.addEventListener("click", (e) => {
+  	if(!e.target.closest("textarea")){
+    	textareas.forEach(t => t.classList.remove("expanded"));}});
 
 </script>
 </body>

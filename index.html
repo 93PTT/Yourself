@@ -195,6 +195,7 @@
 
 	<div class="popup-overlay" id="popup">
 	<div class="popup" id="listContainer"></div>
+	</div>
 	<div class="popup-overlay" id="deletePopup">
 	  	<div class="popup">
     		<div style="text-align:center; margin-bottom:15px; font-weight:600;">
@@ -205,7 +206,7 @@
 
     	<div style="display:flex; gap:10px;">
       		<button class="btn-cancel" onclick="closeDeletePopup()">Hủy</button>
-      		<button class="btn-delete" onclick="confirmDelete()">Xóa</button>
+      		<button class="btn-delete" onclick="confirmDelete()">Xóa</button></div>
     	</div>
   </div>
 
@@ -299,7 +300,8 @@
 		if(!confirm("Xóa danh sách này?")) return;
 		wordLists.splice(index, 1);
 		localStorage.setItem("wordLists", JSON.stringify(wordLists));
-		renderLists(); // render lại}
+		renderLists(); // render lại
+	}
 
 
 

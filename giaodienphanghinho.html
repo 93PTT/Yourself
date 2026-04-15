@@ -15,13 +15,18 @@
 	body{
 		margin:0;
 		overflow:hidden;
-		justify-content:center;
-		background-image:url("nen1.png");
-		background-size:cover;
-		background-position:center;
-		background-repeat:no-repeat;
-		font-family:sans-serif;
-		height:100%;}
+		font-family:sans-serif;}
+
+
+
+	.bg{
+    		position:fixed;
+    		inset:0;
+    		background-image:url("nen1.png");
+    		background-size:cover;
+   		 background-position:center;
+    		background-repeat:no-repeat;
+    		z-index:-10;}
 
 
 	.overlay{
@@ -35,15 +40,12 @@
 		max-width:375px;
 		margin:auto;
 		min-height:100dvh;
-		height:100dvh;
 		display:flex;
-		align-items:center;
 		justify-content:center;
 		padding-top:env(safe-area-inset-top);
 		padding-bottom:env(safe-area-inset-bottom);
 		padding-left:10px;
 		padding-right:10px;
-		gap:200px;
 		flex-direction:column;}
 
 
@@ -51,7 +53,6 @@
 	.card-1{
 		width:350px;
 		height:380px;
-		margin-top:-100px;
 		border-radius:20px;
 		position:relative;
 		box-shadow:0 8px 20px rgba(0,0,0,0.3);}
@@ -61,7 +62,7 @@
 	.card-2{
 		width:340px;
 		height:60px;
-		margin:-50px auto;
+		margin:0 auto;
 		background:transparent;
 		border-radius:20px;
 		padding:10px;
@@ -221,6 +222,7 @@
 
 
 <body>
+	<div class="bg"></div>
 	<div class="overlay"></div>
 	<div class="app-container">
 		<div class="card-1">

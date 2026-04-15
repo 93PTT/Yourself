@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Yourself</title>
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
+
+
+<style>
+	*{box-sizing:border-box;}
+	body{
+		margin:0;
+		overflow:hidden;
+		font-family:sans-serif;
+		background-image:url("nen1.png");
+		background-size:cover;
+		background-position:center;
+		background-repeat:no-repeat;}
+
+
+	.overlay{
+		position:fixed;
+		inset:0;
+		background:rgba(0,0,0,0.25);
+		z-index:-1;}
+
+
+	.app-container{
+		max-width:375px;
+		margin:auto;
+		height:100vh;
+		display:flex;
+		justify-content:center;
+		align-items:center;
+		padding-top:env(safe-area-inset-top);
+		padding-bottom:env(safe-area-inset-bottom);
+		padding-left:10px;
+		padding-right:10px;
+		flex-direction:column;}
+
+
+
+	.card-1{
+		width:350px;
+		height:360px;
+		margin-top:330px;
+		border-radius:20px;
+		position:relative;
+		box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+
+
+
+	.card-2{
+		width: 350px;
+		height:120px;
+		margin:330px auto;
+		background:transparent;
+		border-radius:30px;
+		padding:15px;
+		display: flex;
+		justify-content: center;
+		box-shadow:0 20px 50px rgba(0,0,0,0.38);}
+
+
+
+
+	.box-1{
+		width:300px;
+		height:100px;
+		margin:auto;
+		margin-top:20px;
+		border-radius:20px;
+		background:white;
+		display:flex;
+		align-items:center;
+		padding:15px;
+		font-size:17px;
+		font-weight:600;
+		color:#555555;
+		justify-content:center;
+		box-shadow:0 8px 20px rgba(0,0,0,0.28);
+		text-align: center;}
+
+
+
+	.box-2{
+		width:300px;
+		height: 100px;
+		margin:10px auto;
+		margin-top:30px;
+		border-radius:20px;
+		background:white;
+		display:flex;
+		align-items:center;
+		padding:15px;
+		font-size:17px;
+		font-weight:600;
+		color:#555555;
+		justify-content:center;
+		box-shadow:0 8px 20px rgba(0,0,0,0.28);
+		text-align: center;}
+
+
+
+
+	.box-3{
+		width:100px;
+		height:35px;
+		margin-top:-30px;
+		margin-left:240px;
+		border-radius:10px;
+		background:transparent;
+		display:flex;
+		align-items:center;
+		font-size:15px;
+		font-weight:600;
+		color:#555555;
+		justify-content:center;}
+
+
+	.box-4{
+		width:250px;
+		height:35px;
+		margin:auto;
+		margin-top:10px;
+		border-radius:10px;
+		background:transparent;
+		display:flex;
+		align-items:center;
+		font-size:15px;
+		font-weight:600;
+		color:#555555;
+		justify-content:center;}
+
+
+
+
+
+	.grid-1{
+		display:grid;
+		grid-template-columns:1fr 1fr 1fr;
+		gap:15px;}
+
+
+	.button-1{
+		border: none;
+		outline: none;
+		background: none;
+		width: 80px;
+		height: 50px;
+		border-radius:15px;
+		margin:auto;
+		margin-left:10px;
+		display:flex;
+		align-items:center;
+		justify-content:center;
+		background:whitesmoke;
+		font-size:17px;
+		font-weight:600;
+		color:#555555;
+		box-shadow:0 8px 20px rgba(0,0,0,0.38);
+		cursor:pointer;
+		transition:0.2s;}
+	
+	.button-1:hover{ background:orange; }
+	.button-1:active{transform:scale(0.95);}
+
+
+
+	.grid-2{
+		display:grid;
+		grid-template-columns:auto auto;
+		gap:10px;
+		justify-content:start;}
+
+
+
+	.button-2{
+		border: none;
+		outline: none;
+		background: none;
+		width: 70px;
+		height: 50px;
+		border-radius:15px;
+		margin-top:10px;
+		margin-left:10px;
+		display:flex;
+		align-items:center;
+		justify-content:center;
+		background:whitesmoke;
+		font-size:17px;
+		font-weight:600;
+		color:#555555;
+		box-shadow:0 8px 20px rgba(0,0,0,0.38);
+		cursor:pointer;
+		transition:0.2s;}
+	
+	.button-2:hover{ background:orange; }
+	.button-2:active{transform:scale(0.95);}
+	.button-2.active{
+  		background: orange;
+  		color: white;}
+
+
+	
+
+</style>
+</head>
+
+
+
+
+
+<body>
+	<div class="overlay"></div>
+	<div class="app-container">
+		<div class="card-1">
+			<div class="grid-2">
+    				<button id="btnAnh" class="button-2 active" onclick="showEnglish()">Anh</button>
+				<button id="btnViet" class="button-2" onclick="showVietnamese()">Việt</button>
+		</div>
+			<div class="box box-3" id="btnO3">Từ còn lại</div>
+			<div class="box box-1" id="btnO1">Ô 1</div>
+			<div class="box box-2" id="btnO2">Ô 2</div>
+			<div class="box box-4" id="btnO4">Phiên âm</div>
+		</div>
+
+		<div class="card-2 grid-1">
+    			<button class="button-1" onclick="backWord()">Back</button>
+    			<button class="button-1" onclick="speakWord()">Phát âm</button>
+    			<button class="button-1" onclick="nextWord()">Next</button>
+		</div>
+	</div>
+
+
+
+
+<script>
+	let selectedList = JSON.parse(localStorage.getItem('selectedList'));
+	let currentList = selectedList?.words || [];
+	shuffleArray(currentList);
+
+	let currentIndex = 0;
+	let mode = 'en';
+	let showAnswer = false;
+
+
+	async function renderWord(){
+  	if(currentList.length === 0){
+    	document.getElementById('btnO1').innerText = "Không có dữ liệu";
+    	document.getElementById('btnO2').innerText = "";
+    	return;
+  	}
+
+  	let word = currentList[currentIndex];
+
+  	if(mode === 'en'){
+    	// Ô 1: Việt | Ô 2: Anh
+    	document.getElementById('btnO1').innerText = word.vi;
+    	document.getElementById('btnO2').innerText = showAnswer ? word.en : "";
+  	}else{
+    	// Ô 1: Anh | Ô 2: Việt
+    	document.getElementById('btnO1').innerText = word.en;
+    	document.getElementById('btnO2').innerText = showAnswer ? word.vi : "";
+  	}
+
+
+	let ipa = await getIPA(word.en);
+	let ipaText = "";
+
+	if(mode === 'en'){
+  	ipaText = showAnswer ? ipa : "";
+	}else{
+  	ipaText = ipa;
+	}
+
+	document.getElementById('btnO4').innerText = ipaText;
+
+
+  	document.getElementById('btnO3').innerText =
+    	`Còn ${currentList.length - currentIndex - 1} từ`;
+	}
+
+
+	function nextWord(){
+  	if(currentList.length === 0) return;
+
+  	if(!showAnswer){
+    	showAnswer = true;
+  	}else{
+    	if(currentIndex < currentList.length - 1){
+      	currentIndex++;
+      	showAnswer = false;
+    	} else {
+
+      	launchFireworks();
+      	return;
+    	}
+  	}
+
+  	renderWord();
+	}
+
+	function showEnglish(){
+  	mode = 'en';
+
+  	currentIndex = 0;
+  	showAnswer = false;
+
+  	document.getElementById('btnAnh').classList.add('active');
+  	document.getElementById('btnViet').classList.remove('active');
+
+  	renderWord();
+	}
+
+
+	function showVietnamese(){
+  	mode = 'vi';
+
+  	currentIndex = 0;
+  	showAnswer = false;
+
+  	document.getElementById('btnViet').classList.add('active');
+  	document.getElementById('btnAnh').classList.remove('active');
+
+  	renderWord();
+	}
+
+
+	showEnglish();
+
+	function shuffleArray(array){
+  	for(let i = array.length - 1; i > 0; i--){
+    	let j = Math.floor(Math.random() * (i + 1));
+    	[array[i], array[j]] = [array[j], array[i]];
+  	}
+	}
+
+	function speakWord(){
+  	if(currentList.length === 0) return;
+
+  	let word = currentList[currentIndex].en;
+
+  	let utterance = new SpeechSynthesisUtterance(word);
+  	utterance.lang = 'en-US';
+
+  	speechSynthesis.speak(utterance);
+	}
+
+	async function getIPA(word){
+  	try{
+    	let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    	let data = await res.json();
+
+    	if(data[0].phonetics){
+      	for(let p of data[0].phonetics){
+        if(p.text) return p.text;
+      	}
+    	}
+
+    	return "";
+  	}catch(e){
+    	return "";
+  	}
+	}
+
+	function backWord() {
+  	if(currentList.length === 0) return;
+
+  	if(showAnswer) {
+
+    	showAnswer = false;
+  	} else {
+
+    	if(currentIndex > 0){
+      	currentIndex--;
+      	showAnswer = true;
+    	}
+  	}
+
+  	renderWord();
+	}
+
+
+</script>
+</body>
+</html>
+
+		
+
+

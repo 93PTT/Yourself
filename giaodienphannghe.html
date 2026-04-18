@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nghe</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+
+
+<style>
+	*{box-sizing:border-box;}
+	body{
+		margin:0;
+		font-family:'Poppins', sans-serif;
+		background:snow;
+	}
+
+
+	.app-container{
+		max-width:375px;
+		margin:auto;
+		min-height:100vh;
+		display:flex;
+		flex-direction:column;
+		padding:10px;
+	}
+
+
+
+	.card-1{
+		width: 350px;
+		height:600px;
+		border-radius: 20px;
+		margin:auto;
+		background-image: url("cat5.png");
+    		background-size: cover;
+    		background-position: center;
+		background-repeat: no-repeat;
+		box-shadow:0 20px 50px rgba(0,0,0,0.38);
+	}
+
+
+
+	.cat5-img{
+    		width: 100%;
+    		height: 100%;
+    		object-fit: cover;
+	}
+
+
+
+
+	.box-1 {
+  		width:170px;
+		height:70px;
+		margin:auto;
+		margin-top:100px;
+		border-radius:20px;
+		background:transparent;
+		display:flex;
+		align-items:center;
+		font-size:17px;
+		font-weight:600;
+		color:#555555;
+		justify-content:center;
+		box-shadow:0 8px 20px rgba(0,0,0,0.28);
+		text-align: center;
+	}
+
+
+
+	.box-2 {
+  		width:300px;
+		height:100px;
+		margin:auto;
+		margin-top:200px;
+		border-radius:20px;
+		background:transparent;
+		display:flex;
+		align-items:center;
+		font-size:17px;
+		font-weight:600;
+		color:#555555;
+		justify-content:center;
+		box-shadow:0 8px 20px rgba(0,0,0,0.28);
+		text-align: center;
+	}
+
+
+	.gif{
+		width:200%;
+		height:200%;
+		object-fit:contain;
+	}
+
+	
+
+</style>
+</head>
+
+
+
+
+
+<body>
+	<div class="app-container">
+		<div class="card-1">
+			<div class="box-1">
+				<img src="audio.gif" class="gif">
+			</div>
+			<div class="box-2" id="box-2"></div>
+		</div>
+	</div>
+
+
+<script>
+const box2 = document.getElementById("box-2");
+
+let list = [];
+let index = 0;
+
+/* =========================
+   LOAD DATA
+========================= */
+function loadData(){
+  try {
+    const selected = JSON.parse(localStorage.getItem("selectedList"));
+
+    if(!selected || !selected.words){
+      box2.textContent = "NO LIST SELECTED";
+      return;
+    }
+
+    list = selected.words;
+
+    console.log("SELECTED LIST:", selected.name);
+    console.log("WORDS:", list);
+
+    box2.textContent = "LOADED: " + list.length;
+
+  } catch (e) {
+    console.log("LOAD ERROR", e);
+    box2.textContent = "LOAD ERROR";
+  }
+}
+
+/* =========================
+   TEXT TO SPEECH (iOS OK)
+========================= */
+function speak(text, lang){
+
+  return new Promise(resolve => {
+
+    if(!text){
+      resolve("no-text");
+      return;
+    }
+
+    // stop previous speech
+    speechSynthesis.cancel();
+
+    const u = new SpeechSynthesisUtterance(text);
+
+    u.lang = lang || "en-US";
+    u.rate = 1;
+    u.pitch = 1;
+    u.volume = 1;
+
+    u.onend = () => resolve("done");
+    u.onerror = (e) => {
+      console.log("TTS ERROR:", e);
+      resolve("error");
+    };
+
+    speechSynthesis.speak(u);
+  });
+}
+
+/* =========================
+   MAIN LOOP
+========================= */
+async function run(){
+
+  if(!list.length){
+    box2.textContent = "EMPTY";
+    return;
+  }
+
+  while(index < list.length){
+
+    const item = list[index];
+
+    console.log("ITEM:", item);
+
+    box2.textContent = item.en;
+
+    // 🔊 đọc tiếng Anh
+    await speak(item.en, "en-US");
+    await delay(300);
+
+    // 🔊 đọc tiếng Việt
+    await speak(item.vi, "vi-VN");
+    await delay(500);
+
+    index++;
+  }
+
+  box2.textContent = "FINISH";
+  console.log("DONE");
+}
+
+/* =========================
+   DELAY
+========================= */
+function delay(ms){
+  return new Promise(r => setTimeout(r, ms));
+}
+
+/* =========================
+   START (IMPORTANT iOS FIX)
+========================= */
+function start(){
+
+  console.log("START");
+
+  // unlock speech on iOS
+  const u = new SpeechSynthesisUtterance(" ");
+  speechSynthesis.speak(u);
+
+  run();
+}
+
+/* =========================
+   INIT
+========================= */
+function init(){
+
+  loadData();
+
+  document.addEventListener("click", start, { once: true });
+  document.addEventListener("touchstart", start, { once: true });
+}
+
+init();
+</script>
+
+</body>
+</html>
+
+		
+
+

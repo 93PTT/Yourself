@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <title>Yourself</title>
 <link rel="icon" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
@@ -48,7 +47,7 @@ body{
 	display:flex;
 	justify-content:center;
 	align-items:center;
-	transform: translateY(-200px);
+	transform: translateY(-230px);
 }
 
 .box-2 {
@@ -65,7 +64,7 @@ body{
 	color:white;
 	box-shadow:0 8px 20px rgba(0,0,0,0.28);
 	text-align:center;
-	transform: translateY(-400px);
+	transform: translateY(-430px);
 }
 
 .gif{
@@ -76,7 +75,7 @@ body{
 
 .control{
 	position:absolute;
-	top:65%;
+	top:60%;
 	left:50%;
 	transform:translateX(-50%);
 }
@@ -88,11 +87,15 @@ body{
 	font-size:16px;
 	font-weight:600;
 	background:#ffffffcc;
+	transform: translateY(-210px);
 }
 </style>
 </head>
 
 <body>
+
+<!-- audio ẩn để chạy nền -->
+<audio id="player" style="display:none;"></audio>
 
 <div class="overlay"></div>
 
@@ -113,6 +116,7 @@ body{
 <script>
 const box2 = document.getElementById("box-2");
 const btn = document.getElementById("btn-control");
+const audio = document.getElementById("player");
 
 let list = [];
 let index = 0;
@@ -120,9 +124,7 @@ let index = 0;
 let isPlaying = false;
 let isPaused = false;
 
-/* =========================
-   LOAD DATA
-========================= */
+/* LOAD DATA */
 function loadData(){
   try {
     const selected = JSON.parse(localStorage.getItem("selectedList"));
@@ -140,9 +142,7 @@ function loadData(){
   }
 }
 
-/* =========================
-   SPEAK
-========================= */
+/* GOOGLE TTS */
 function speak(text, lang){
   return new Promise(resolve => {
 
@@ -151,32 +151,28 @@ function speak(text, lang){
       return;
     }
 
-    speechSynthesis.cancel();
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang === "vi-VN" ? "vi" : "en"}&client=tw-ob`;
 
-    const u = new SpeechSynthesisUtterance(text);
+    audio.src = url;
+    audio.currentTime = 0;
 
-    u.lang = lang || "en-US";
-    u.rate = 1;
-    u.pitch = 1;
-    u.volume = 1;
+    audio.onended = () => resolve();
 
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
+    audio.onerror = () => {
+      console.log("AUDIO ERROR");
+      resolve();
+    };
 
-    speechSynthesis.speak(u);
+    audio.play().catch(() => resolve());
   });
 }
 
-/* =========================
-   DELAY
-========================= */
+/* DELAY */
 function delay(ms){
   return new Promise(r => setTimeout(r, ms));
 }
 
-/* =========================
-   WAIT RESUME
-========================= */
+/* WAIT RESUME */
 function waitUntilResume(){
   return new Promise(resolve => {
     const t = setInterval(()=>{
@@ -188,9 +184,7 @@ function waitUntilResume(){
   });
 }
 
-/* =========================
-   MAIN LOOP
-========================= */
+/* MAIN LOOP */
 async function run(){
 
   if(!list.length){
@@ -223,34 +217,22 @@ async function run(){
     box2.textContent = "FINISH";
     isPlaying = false;
     btn.textContent = "Start";
-
-    // 👉 reset để bấm lại chạy từ đầu
     index = 0;
   }
 }
 
-/* =========================
-   START
-========================= */
+/* START */
 function start(){
-
   if(isPlaying) return;
 
-  // nếu đã finish thì reset (backup)
   if(index >= list.length){
     index = 0;
   }
 
-  // unlock iOS
-  const u = new SpeechSynthesisUtterance(" ");
-  speechSynthesis.speak(u);
-
   run();
 }
 
-/* =========================
-   BUTTON CONTROL
-========================= */
+/* BUTTON */
 btn.addEventListener("click", () => {
 
   if(!isPlaying){
@@ -260,20 +242,18 @@ btn.addEventListener("click", () => {
   }
 
   if(isPaused){
-    speechSynthesis.resume();
+    audio.play();
     isPaused = false;
     btn.textContent = "Pause";
   }else{
-    speechSynthesis.pause();
+    audio.pause();
     isPaused = true;
     btn.textContent = "Start";
   }
 
 });
 
-/* =========================
-   INIT
-========================= */
+/* INIT */
 loadData();
 </script>
 

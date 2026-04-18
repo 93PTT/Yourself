@@ -121,17 +121,23 @@ let isPlaying = false;
 let isPaused = false;
 
 /* =========================
-   WAKE LOCK
+   WAKE LOCK (FIXED)
 ========================= */
 let wakeLock = null;
+let isWakeLockActive = false;
 
 async function keepScreenOn(){
   try{
+    if(isWakeLockActive) return; // 🔥 tránh gọi nhiều lần
+
     wakeLock = await navigator.wakeLock.request('screen');
+    isWakeLockActive = true;
+
     console.log("Screen locked");
 
     wakeLock.addEventListener('release', () => {
       console.log("Screen lock released");
+      isWakeLockActive = false;
     });
 
   }catch(err){
@@ -140,15 +146,17 @@ async function keepScreenOn(){
 }
 
 function releaseScreen(){
-  if(wakeLock){
+  if(wakeLock && isWakeLockActive){
     wakeLock.release();
     wakeLock = null;
+    isWakeLockActive = false;
   }
 }
 
+// 👉 rời app thì thả luôn (tránh hao pin)
 document.addEventListener("visibilitychange", () => {
-  if(wakeLock !== null && document.visibilityState === "visible"){
-    keepScreenOn();
+  if(document.visibilityState === "hidden"){
+    releaseScreen();
   }
 });
 
@@ -257,7 +265,7 @@ async function run(){
     btn.textContent = "Start";
     index = 0;
 
-    releaseScreen(); // 🔥 tắt giữ màn hình
+    releaseScreen(); // 🔥 finish là thả màn hình
   }
 }
 
@@ -272,7 +280,7 @@ function start(){
     index = 0;
   }
 
-  keepScreenOn(); // 🔥 giữ màn hình
+  keepScreenOn(); // 🔥 chỉ giữ khi bắt đầu
 
   // unlock iOS
   const u = new SpeechSynthesisUtterance(" ");
@@ -301,7 +309,7 @@ btn.addEventListener("click", () => {
     isPaused = true;
     btn.textContent = "Start";
 
-    releaseScreen(); // 🔥 pause thì cho tắt màn hình lại
+    releaseScreen(); // 🔥 pause là thả luôn
   }
 
 });

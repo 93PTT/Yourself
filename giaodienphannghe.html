@@ -11,10 +11,12 @@
 
 
 
+
 <style>
 	*{box-sizing:border-box;}
 
 	body{
+		<audio id="player" controls></audio>
 		margin:0;
 		overflow:hidden;
 		font-family:sans-serif;
@@ -61,33 +63,50 @@
 		color:#555555;
 		justify-content:center;
 		text-align: center;
-		transform: translateY(-180px);}
+		transform: translateY(-230px);}
 
 
 
 	.box-2 {
   		width:300px;
-		height:100px;
+		height:150px;
 		margin:auto;
 		margin-top:200px;
 		border-radius:20px;
 		background:transparent;
 		display:flex;
 		align-items:center;
-		font-size:18px;
+		font-size:20px;
 		font-weight:600;
 		color:snow;
 		justify-content:center;
 		box-shadow:0 8px 20px rgba(0,0,0,0.28);
 		text-align: center;
-		transform: translateY(-370px);}
+		transform: translateY(-430px);}
 
 
 	.gif{
 		width:200%;
 		height:200%;
-		object-fit:contain;
-	}
+		object-fit:contain;}
+
+
+
+	.control{
+  		position:absolute;
+  		top:60%;
+  		left:50%;
+  		transform:translateX(-50%);}
+
+
+	#btn-control{
+  		padding:12px 30px;
+  		border:none;
+  		border-radius:20px;
+  		font-size:16px;
+  		font-weight:600;
+  		background:#ffffffcc;
+		transform: translateY(-210px);}}
 
 	
 
@@ -104,6 +123,7 @@
 	<div class="card-1">
 			<div class="box-1"><img src="audio.gif" class="gif"></div>
 			<div class="box-2" id="box-2"></div>
+			<div class="control"><button id="btn-control">Start</button></div>
 		</div>
 	</div>
 
@@ -139,37 +159,6 @@ function loadData(){
   }
 }
 
-/* =========================
-   TEXT TO SPEECH (iOS OK)
-========================= */
-function speak(text, lang){
-
-  return new Promise(resolve => {
-
-    if(!text){
-      resolve("no-text");
-      return;
-    }
-
-    // stop previous speech
-    speechSynthesis.cancel();
-
-    const u = new SpeechSynthesisUtterance(text);
-
-    u.lang = lang || "en-US";
-    u.rate = 1;
-    u.pitch = 1;
-    u.volume = 1;
-
-    u.onend = () => resolve("done");
-    u.onerror = (e) => {
-      console.log("TTS ERROR:", e);
-      resolve("error");
-    };
-
-    speechSynthesis.speak(u);
-  });
-}
 
 /* =========================
    MAIN LOOP
@@ -181,29 +170,37 @@ async function run(){
     return;
   }
 
-  while(index < list.length){
+  isPlaying = true;
+
+  while(index < list.length && isPlaying){
+
+    if(isPaused){
+      await waitUntilResume();
+    }
 
     const item = list[index];
 
-    console.log("ITEM:", item);
-
     box2.textContent = item.en;
 
-    // 🔊 đọc tiếng Anh
     await speak(item.en, "en-US");
     await delay(300);
 
-    // 🔊 đọc tiếng Việt
+    if(isPaused){
+      await waitUntilResume();
+    }
+
     await speak(item.vi, "vi-VN");
     await delay(500);
 
     index++;
   }
 
-  box2.textContent = "FINISH";
-  console.log("DONE");
+  if(index >= list.length){
+    box2.textContent = "FINISH";
+    isPlaying = false;
+    document.getElementById("btn-control").textContent = "Start";
+  }
 }
-
 /* =========================
    DELAY
 ========================= */
@@ -216,15 +213,13 @@ function delay(ms){
 ========================= */
 function start(){
 
-  console.log("START");
+  if(isPlaying) return;
 
-  // unlock speech on iOS
   const u = new SpeechSynthesisUtterance(" ");
   speechSynthesis.speak(u);
 
   run();
 }
-
 /* =========================
    INIT
 ========================= */
@@ -237,8 +232,72 @@ function init(){
 }
 
 init();
-</script>
 
+
+let isPlaying = false;
+let isPaused = false;
+let currentUtterance = null;
+
+
+function speak(text, lang){
+
+  return new Promise(resolve => {
+
+    if(!text){
+      resolve();
+      return;
+    }
+
+    const u = new SpeechSynthesisUtterance(text);
+    currentUtterance = u;
+
+    u.lang = lang || "en-US";
+
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+
+    speechSynthesis.speak(u);
+  });
+}
+
+
+
+function waitUntilResume(){
+  return new Promise(resolve => {
+    const interval = setInterval(() => {
+      if(!isPaused){
+        clearInterval(interval);
+        resolve();
+      }
+    }, 200);
+  });
+}
+
+
+
+const btn = document.getElementById("btn-control");
+
+btn.addEventListener("click", () => {
+
+  if(!isPlaying){
+    start();
+    btn.textContent = "Pause";
+    return;
+  }
+
+  if(isPaused){
+    speechSynthesis.resume();
+    isPaused = false;
+    btn.textContent = "Pause";
+  }else{
+    speechSynthesis.pause();
+    isPaused = true;
+    btn.textContent = "Start";
+  }
+
+});
+
+</script>
 </body>
 </html>
 

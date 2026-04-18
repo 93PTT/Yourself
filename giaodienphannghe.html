@@ -2,137 +2,123 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <title>Yourself</title>
 <link rel="icon" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
 
-
-
-
-
 <style>
-	*{box-sizing:border-box;}
+*{box-sizing:border-box;}
 
-	body{
-		<audio id="player" controls></audio>
-		margin:0;
-		overflow:hidden;
-		font-family:sans-serif;
-		background-image:url("nen1.png");
-		background-size:cover;
-		background-position:center;
-		background-repeat:no-repeat;}
+body{
+	margin:0;
+	overflow:hidden;
+	font-family:sans-serif;
+	background-image:url("nen1.png");
+	background-size:cover;
+	background-position:center;
+	background-repeat:no-repeat;
+}
 
+.overlay{
+	position:fixed;
+	inset:0;
+	background:rgba(0,0,0,0.25);
+	z-index:-1;
+}
 
-	.overlay{
-		position:fixed;
-		inset:0;
-		background:rgba(0,0,0,0.25);
-		z-index:-1;}
+.app-container{
+	max-width:375px;
+	margin:auto;
+	height:100vh;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	padding:10px;
+}
 
+.box-1 {
+	width:170px;
+	height:70px;
+	margin:auto;
+	margin-top:100px;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	transform: translateY(-200px);
+}
 
-	.app-container{
-		max-width:375px;
-		margin:auto;
-		height:100vh;
-		display:flex;
-		justify-content:center;
-		align-items:center;
-		padding-top:env(safe-area-inset-top);
-		padding-bottom:env(safe-area-inset-bottom);
-		padding-left:10px;
-		padding-right:10px;}
+.box-2 {
+	width:300px;
+	height:150px;
+	margin:auto;
+	margin-top:200px;
+	border-radius:20px;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	font-size:20px;
+	font-weight:600;
+	color:white;
+	box-shadow:0 8px 20px rgba(0,0,0,0.28);
+	text-align:center;
+	transform: translateY(-400px);
+}
 
+.gif{
+	width:200%;
+	height:200%;
+	object-fit:contain;
+}
 
+.control{
+	position:absolute;
+	top:65%;
+	left:50%;
+	transform:translateX(-50%);
+}
 
-
-
-	.box-1 {
-  		width:170px;
-		height:70px;
-		margin:auto;
-		margin-top:100px;
-		border-radius:20px;
-		background:transparent;
-		display:flex;
-		align-items:center;
-		font-size:17px;
-		font-weight:600;
-		color:#555555;
-		justify-content:center;
-		text-align: center;
-		transform: translateY(-230px);}
-
-
-
-	.box-2 {
-  		width:300px;
-		height:150px;
-		margin:auto;
-		margin-top:200px;
-		border-radius:20px;
-		background:transparent;
-		display:flex;
-		align-items:center;
-		font-size:20px;
-		font-weight:600;
-		color:snow;
-		justify-content:center;
-		box-shadow:0 8px 20px rgba(0,0,0,0.28);
-		text-align: center;
-		transform: translateY(-430px);}
-
-
-	.gif{
-		width:200%;
-		height:200%;
-		object-fit:contain;}
-
-
-
-	.control{
-  		position:absolute;
-  		top:60%;
-  		left:50%;
-  		transform:translateX(-50%);}
-
-
-	#btn-control{
-  		padding:12px 30px;
-  		border:none;
-  		border-radius:20px;
-  		font-size:16px;
-  		font-weight:600;
-  		background:#ffffffcc;
-		transform: translateY(-210px);}}
-
-	
-
+#btn-control{
+	padding:12px 30px;
+	border:none;
+	border-radius:20px;
+	font-size:16px;
+	font-weight:600;
+	background:#ffffffcc;
+}
 </style>
 </head>
 
-
-
-
-
 <body>
-	<div class="overlay"></div>
-	<div class="app-container">
+
+<div class="overlay"></div>
+
+<div class="app-container">
 	<div class="card-1">
-			<div class="box-1"><img src="audio.gif" class="gif"></div>
-			<div class="box-2" id="box-2"></div>
-			<div class="control"><button id="btn-control">Start</button></div>
+		<div class="box-1">
+			<img src="audio.gif" class="gif">
+		</div>
+
+		<div class="box-2" id="box-2"></div>
+
+		<div class="control">
+			<button id="btn-control">Start</button>
 		</div>
 	</div>
-
+</div>
 
 <script>
 const box2 = document.getElementById("box-2");
+const btn = document.getElementById("btn-control");
 
 let list = [];
 let index = 0;
+
+let isPlaying = false;
+let isPaused = false;
 
 /* =========================
    LOAD DATA
@@ -147,18 +133,60 @@ function loadData(){
     }
 
     list = selected.words;
-
-    console.log("SELECTED LIST:", selected.name);
-    console.log("WORDS:", list);
-
-    box2.textContent = "Start:" + list.length;
+    box2.textContent = "Start: " + list.length;
 
   } catch (e) {
-    console.log("LOAD ERROR", e);
     box2.textContent = "LOAD ERROR";
   }
 }
 
+/* =========================
+   SPEAK
+========================= */
+function speak(text, lang){
+  return new Promise(resolve => {
+
+    if(!text){
+      resolve();
+      return;
+    }
+
+    speechSynthesis.cancel();
+
+    const u = new SpeechSynthesisUtterance(text);
+
+    u.lang = lang || "en-US";
+    u.rate = 1;
+    u.pitch = 1;
+    u.volume = 1;
+
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+
+    speechSynthesis.speak(u);
+  });
+}
+
+/* =========================
+   DELAY
+========================= */
+function delay(ms){
+  return new Promise(r => setTimeout(r, ms));
+}
+
+/* =========================
+   WAIT RESUME
+========================= */
+function waitUntilResume(){
+  return new Promise(resolve => {
+    const t = setInterval(()=>{
+      if(!isPaused){
+        clearInterval(t);
+        resolve();
+      }
+    },200);
+  });
+}
 
 /* =========================
    MAIN LOOP
@@ -174,9 +202,7 @@ async function run(){
 
   while(index < list.length && isPlaying){
 
-    if(isPaused){
-      await waitUntilResume();
-    }
+    if(isPaused) await waitUntilResume();
 
     const item = list[index];
 
@@ -185,9 +211,7 @@ async function run(){
     await speak(item.en, "en-US");
     await delay(300);
 
-    if(isPaused){
-      await waitUntilResume();
-    }
+    if(isPaused) await waitUntilResume();
 
     await speak(item.vi, "vi-VN");
     await delay(500);
@@ -198,85 +222,35 @@ async function run(){
   if(index >= list.length){
     box2.textContent = "FINISH";
     isPlaying = false;
-    document.getElementById("btn-control").textContent = "Start";
+    btn.textContent = "Start";
+
+    // 👉 reset để bấm lại chạy từ đầu
+    index = 0;
   }
-}
-/* =========================
-   DELAY
-========================= */
-function delay(ms){
-  return new Promise(r => setTimeout(r, ms));
 }
 
 /* =========================
-   START (IMPORTANT iOS FIX)
+   START
 ========================= */
 function start(){
 
   if(isPlaying) return;
 
+  // nếu đã finish thì reset (backup)
+  if(index >= list.length){
+    index = 0;
+  }
+
+  // unlock iOS
   const u = new SpeechSynthesisUtterance(" ");
   speechSynthesis.speak(u);
 
   run();
 }
+
 /* =========================
-   INIT
+   BUTTON CONTROL
 ========================= */
-function init(){
-
-  loadData();
-
-  document.addEventListener("click", start, { once: true });
-  document.addEventListener("touchstart", start, { once: true });
-}
-
-init();
-
-
-let isPlaying = false;
-let isPaused = false;
-let currentUtterance = null;
-
-
-function speak(text, lang){
-
-  return new Promise(resolve => {
-
-    if(!text){
-      resolve();
-      return;
-    }
-
-    const u = new SpeechSynthesisUtterance(text);
-    currentUtterance = u;
-
-    u.lang = lang || "en-US";
-
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-
-    speechSynthesis.speak(u);
-  });
-}
-
-
-
-function waitUntilResume(){
-  return new Promise(resolve => {
-    const interval = setInterval(() => {
-      if(!isPaused){
-        clearInterval(interval);
-        resolve();
-      }
-    }, 200);
-  });
-}
-
-
-
-const btn = document.getElementById("btn-control");
-
 btn.addEventListener("click", () => {
 
   if(!isPlaying){
@@ -297,9 +271,11 @@ btn.addEventListener("click", () => {
 
 });
 
+/* =========================
+   INIT
+========================= */
+loadData();
 </script>
+
 </body>
 </html>
-
-		
-

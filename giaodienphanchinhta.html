@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Chính tả</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    font-family:sans-serif;
+    /* THAY ĐỔI 1: Thêm nền ảnh ở đây */
+    background: url('nen1.png') no-repeat center center;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.header{
+    text-align:center;
+    margin-top:10px;
+    height:100dvh;
+}
+
+.bg-video{
+    position:fixed;
+    inset:0;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    min-width:100vw;
+    min-height:100vh;
+    object-fit:cover;
+    z-index:-2;
+}
+
+.app-container{
+    max-width:375px;
+    margin:auto;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+    padding-left:10px;
+    padding-right:10px;
+}
+
+.overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.25);
+    z-index:-1;
+}
+
+.card-1{
+    width:100%;
+    height:350px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(0px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    transform:translateY(-150px);
+}
+
+.box-1{
+    width:300px;
+    height:100px;
+    margin:auto;
+    margin-top:10px;
+    border-radius:20px;
+    background:snow;
+    display:flex;
+    align-items:center;
+    font-size:17px;
+    font-weight:600;
+    color:#555;
+    justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.28);
+    text-align:center;
+}
+
+.box-2{
+    width:300px;
+    height:100px;
+    margin:20px auto;
+    border-radius:20px;
+    background:snow;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.box-3{
+    width:100px;
+    height:35px;
+    margin-top:10px;
+    align-self:flex-end;
+    margin-right:10px;
+    border-radius:10px;
+    background:snow;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    font-weight:600;
+    color:#555;
+}
+
+/* INPUT FIX */
+#answerInput{
+    width:100%;
+    height:100%;
+    border:none;
+    outline:none;
+    font-size:17px;
+    font-weight:600;
+    text-align:center;
+    border-radius:20px;
+}
+
+.feedback{
+    text-align:center;
+    font-weight:600;
+    margin-top:-10px;
+    height:35px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.feedback.correct{ color:#1b5e20; }
+.feedback.wrong{ color:#b71c1c; }
+
+</style>
+</head>
+
+<body>
+
+<!-- THAY ĐỔI 2: Xóa thẻ video đi -->
+<!-- <video autoplay muted loop playsinline class="bg-video">
+    <source src="dog.mp4" type="video/mp4">
+</video> -->
+
+<div class="overlay"></div>
+
+<div class="app-container">
+    <div class="card-1">
+
+        <div class="box-3" id="btnO3">Từ còn lại</div>
+
+        <div class="box-1" id="btnO1">Ô 1</div>
+
+        <!-- FIX: input cố định (QUAN TRỌNG NHẤT) -->
+        <div class="box-2">
+            <input id="answerInput" type="text" autocomplete="off" onkeydown="handleEnter(event)">
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+    </div>
+</div>
+
+<script>
+
+let selectedList = JSON.parse(localStorage.getItem('selectedList'));
+let currentList = selectedList?.words || [];
+
+shuffleArray(currentList);
+let currentIndex = 0;
+
+/* ================= RENDER ================= */
+function renderWord(){
+
+    if(currentList.length === 0){
+        document.getElementById("btnO1").innerText = "Không có dữ liệu";
+        document.getElementById("btnO3").innerText = "";
+        return;
+    }
+
+    let word = currentList[currentIndex];
+
+    document.getElementById("btnO1").innerText = word.vi;
+
+    document.getElementById("btnO3").innerText =
+        `Còn ${currentList.length - currentIndex - 1} từ`;
+
+    // CHỈ reset value, KHÔNG tạo input mới
+    const input = document.getElementById("answerInput");
+    input.value = "";
+
+    const fb = document.getElementById("feedback");
+    fb.innerText = "";
+    fb.className = "feedback";
+
+    // giữ keyboard iPhone
+    setTimeout(()=>{
+        input.focus();
+    },50);
+}
+
+/* ================= CHECK ================= */
+function handleEnter(e){
+    if(e.key!== "Enter") return;
+
+    let word = currentList[currentIndex];
+    let input = document.getElementById("answerInput").value.trim();
+    let feedback = document.getElementById("feedback");
+
+    if(input.toLowerCase() === word.en.toLowerCase()){
+        feedback.innerText = "Chính xác ✔";
+        feedback.className = "feedback correct";
+
+        setTimeout(()=>{
+            nextWord();
+        },700);
+
+    } else {
+        feedback.innerText = word.en;
+        feedback.className = "feedback wrong";
+
+        let wrongWord = currentList.splice(currentIndex,1)[0];
+        let newPos = Math.min(currentIndex + 3, currentList.length);
+        currentList.splice(newPos,0,wrongWord);
+
+        setTimeout(()=>{
+            renderWord();
+        },1500);
+    }
+}
+
+/* ================= NEXT ================= */
+function nextWord(){
+    currentIndex++;
+
+    if(currentIndex >= currentList.length){
+        document.getElementById("btnO1").innerText = "FINISH 🎉";
+        document.getElementById("btnO3").innerText = "";
+        return;
+    }
+
+    renderWord();
+}
+
+/* ================= SHUFFLE ================= */
+function shuffleArray(array){
+    if(!array || array.length <= 1) return;
+    for(let i = array.length - 1; i > 0; i--){
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+/* ================= INIT ================= */
+window.addEventListener("load", ()=>{
+    const input = document.getElementById("answerInput");
+    setTimeout(()=> input.focus(), 200);
+
+    // giữ keyboard iOS
+    input.addEventListener("blur", ()=>{
+        setTimeout(()=> input.focus(), 0);
+    });
+});
+
+renderWord();
+
+</script>
+
+</body>
+</html>

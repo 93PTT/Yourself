@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Ghinho</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style>
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		-webkit-tap-highlight-color: transparent;
+		touch-action: manipulation;
+	}
+
+	html, body {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		position: fixed;
+		top: 0; left: 0;
+		font-family: 'Poppins', sans-serif;
+	}
+
+	body {
+		background: url('nen1.png') no-repeat center bottom;
+		background-size: cover;
+		background-attachment: fixed;
+	}
+
+	/* ===== TOÀN BỘ APP ===== */
+	.app {
+		width: 100%;
+		height: 100dvh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: env(safe-area-inset-top) 16px 0 16px;
+		overflow: hidden;
+	}
+
+	/* ===== HEADER ===== */
+	.header {
+		margin-top: 6px;
+		margin-bottom: 6px;
+		text-align: center;
+		flex-shrink: 0;
+	}
+
+	.cat2-img {
+		width: 90px;
+		height: 90px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 3px solid rgba(255,255,255,0.8);
+		box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+	}
+
+	/* ===== CARD CHÍNH ===== */
+	.card-main {
+		width: 100%;
+		max-width: 340px;
+		background: rgba(255,255,255,0.15);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border-radius: 28px;
+		border: 1px solid rgba(255,255,255,0.3);
+		padding: 14px;
+		box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+		flex-shrink: 0;
+	}
+
+	/* Counter nhỏ */
+	.counter {
+		text-align: right;
+		font-size: 12px;
+		font-weight: 600;
+		color: rgba(255,255,255,0.85);
+		margin-bottom: 8px;
+		padding-right: 6px;
+		text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+	}
+
+	/* Box tiếng Việt */
+	.box-vi {
+		width: 100%;
+		height: 80px;
+		background: rgba(255,255,255,0.92);
+		border-radius: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		font-size: 17px;
+		font-weight: 600;
+		color: #333;
+		box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+		padding: 10px;
+		line-height: 1.3;
+	}
+
+	/* Box kết quả */
+	.box-result {
+		width: 100%;
+		height: 80px;
+		margin-top: 12px;
+		background: rgba(255,255,255,0.92);
+		border-radius: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		font-size: 16px;
+		font-weight: 600;
+		color: #555;
+		box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+		padding: 10px;
+		line-height: 1.3;
+		transition: background 0.3s ease;
+		cursor: pointer;
+	}
+
+	/* ===== BUTTONS ===== */
+	.btn-row {
+		width: 100%;
+		max-width: 340px;
+		display: flex;
+		justify-content: center;
+		gap: 14px;
+		margin-top: 14px;
+		flex-shrink: 0;
+	}
+
+	.btn {
+		border: none;
+		outline: none;
+		width: 68px;
+		height: 68px;
+		border-radius: 50%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		font-family: 'Poppins', sans-serif;
+		font-size: 11px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	.btn:active {
+		transform: scale(0.9);
+	}
+
+	.btn-icon {
+		font-size: 24px;
+		margin-bottom: 2px;
+	}
+
+	.btn-back {
+		background: rgba(255,255,255,0.85);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		color: #666;
+		box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+		border: 1px solid rgba(255,255,255,0.5);
+	}
+
+	.btn-mic {
+		background: linear-gradient(145deg, #FF6B6B, #FF8E53);
+		color: white;
+		width: 78px;
+		height: 78px;
+		box-shadow: 0 8px 28px rgba(255,107,107,0.45);
+		border: 2px solid rgba(255,255,255,0.4);
+	}
+
+	.btn-mic .btn-icon { font-size: 30px; }
+
+	.btn-mic.listening {
+		animation: pulse 1s infinite;
+	}
+
+	@keyframes pulse {
+		0%   { box-shadow: 0 0 0 0 rgba(255,107,107,0.6); }
+		70%  { box-shadow: 0 0 0 18px rgba(255,107,107,0); }
+		100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+	}
+
+	.btn-next {
+		background: rgba(255,255,255,0.85);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		color: #666;
+		box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+		border: 1px solid rgba(255,255,255,0.5);
+	}
+
+	/* ===== CORRECT / WRONG animation ===== */
+	.box-correct {
+		background: rgba(180, 240, 170, 0.95) !important;
+		color: #2d7a2d !important;
+	}
+
+	.box-wrong {
+		background: rgba(255, 200, 200, 0.95) !important;
+		color: #c0392b !important;
+	}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+	<!-- HEADER -->
+	<div class="header">
+		<img src="cat2.png" class="cat2-img">
+	</div>
+
+	<!-- CARD -->
+	<div class="card-main">
+		<div class="counter" id="counter">0 từ còn lại</div>
+		<div class="box-vi" id="boxVi">Đang tải...</div>
+		<div class="box-result" id="boxResult" onclick="speakCurrentWord()">🔊 Chạm để nghe</div>
+	</div>
+
+	<!-- BUTTONS -->
+	<div class="btn-row">
+		<button class="btn btn-back" onclick="backWord()">
+			<span class="btn-icon">◀</span>
+			<span>Back</span>
+		</button>
+		<button class="btn btn-mic" id="btnMic" onclick="startVoice()">
+			<span class="btn-icon">🎤</span>
+			<span>Nói</span>
+		</button>
+		<button class="btn btn-next" onclick="nextWord()">
+			<span class="btn-icon">▶</span>
+			<span>Next</span>
+		</button>
+	</div>
+
+</div>
+
+<script>
+
+// =========================
+// LOAD DATA
+// =========================
+let selectedList = JSON.parse(localStorage.getItem('selectedList'));
+let currentList = selectedList?.words || [];
+shuffleArray(currentList);
+let currentIndex = 0;
+
+// =========================
+// INIT
+// =========================
+renderWord();
+
+// =========================
+// RENDER
+// =========================
+function renderWord() {
+	let boxVi = document.getElementById('boxVi');
+	let boxResult = document.getElementById('boxResult');
+	let counter = document.getElementById('counter');
+
+	if (!currentList.length) {
+		boxVi.innerText = "Không có dữ liệu";
+		boxResult.innerText = "Chọn danh sách từ trước";
+		return;
+	}
+
+	let word = currentList[currentIndex];
+	boxVi.innerText = word.vi || "";
+	boxResult.innerText = "🔊 Chạm để nghe";
+	boxResult.className = "box-result";
+	counter.innerText = (currentList.length - currentIndex) + " từ còn lại";
+}
+
+// =========================
+// NORMALIZE (loại bỏ nhiễu mạnh)
+// =========================
+function normalize(text) {
+	return text
+		.toLowerCase()
+		.trim()
+		.replace(/['']/g, "'")
+		.replace(/[^a-z0-9'\s]/g, '')
+		.replace(/\b(a|an|the|to|is|are|was|were|it|its|i)\b/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+}
+
+// =========================
+// PHONETIC MAP (âm giống nhau)
+// =========================
+function phoneticNormalize(text) {
+	return text
+		.replace(/ph/g, 'f')
+		.replace(/ght/g, 't')
+		.replace(/tion/g, 'shun')
+		.replace(/sion/g, 'zhun')
+		.replace(/ck/g, 'k')
+		.replace(/ee/g, 'i')
+		.replace(/oo/g, 'u')
+		.replace(/wh/g, 'w')
+		.replace(/kn/g, 'n')
+		.replace(/wr/g, 'r')
+		.replace(/mb$/g, 'm')
+		.replace(/ou/g, 'ow')
+		.replace(/th/g, 'd')
+		.replace(/sh/g, 's');
+}
+
+// =========================
+// START VOICE
+// =========================
+function startVoice() {
+	if (!currentList.length) return;
+
+	let correct = (currentList[currentIndex]?.en || "").toLowerCase().trim();
+	const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+	if (!SR) {
+		alert("Trình duyệt không hỗ trợ voice recognition");
+		return;
+	}
+
+	let recognition = new SR();
+	recognition.lang = "en-US";
+	recognition.interimResults = false;
+	recognition.maxAlternatives = 15;
+	recognition.continuous = false;
+
+	// UI: listening
+	let btnMic = document.getElementById('btnMic');
+	btnMic.classList.add('listening');
+	document.getElementById('boxResult').innerText = "🎧 Đang nghe...";
+
+	recognition.start();
+
+	recognition.onresult = function(event) {
+		btnMic.classList.remove('listening');
+
+		let results = event.results[0];
+		let bestScore = 0;
+		let bestSpoken = "";
+
+		for (let i = 0; i < results.length; i++) {
+			let spoken = results[i].transcript.toLowerCase().trim();
+			let score = smartCompare(spoken, correct);
+			if (score > bestScore) {
+				bestScore = score;
+				bestSpoken = spoken;
+			}
+		}
+
+		checkVoice(bestSpoken, correct, bestScore);
+	};
+
+	recognition.onerror = function(e) {
+		btnMic.classList.remove('listening');
+		document.getElementById('boxResult').innerText = "😅 Không nghe rõ, thử lại";
+		setTimeout(() => {
+			if (currentIndex < currentList.length)
+				document.getElementById('boxResult').innerText = "🔊 Chạm để nghe";
+		}, 1500);
+	};
+
+	recognition.onend = function() {
+		btnMic.classList.remove('listening');
+	};
+}
+
+// =========================
+// SMART COMPARE
+// =========================
+function smartCompare(spoken, correct) {
+	let nS = normalize(spoken);
+	let nC = normalize(correct);
+
+	// Exact
+	if (nS === nC) return 1;
+
+	// Contains
+	if (nS.includes(nC) || nC.includes(nS)) return 0.95;
+
+	// Từ đơn nằm trong câu nói
+	let spokenWords = nS.split(' ');
+	let correctWords = nC.split(' ');
+
+	if (correctWords.length === 1 && spokenWords.includes(correctWords[0])) return 0.95;
+
+	// Multi-word: đếm từ khớp
+	if (correctWords.length > 1) {
+		let matchCount = 0;
+		for (let w of correctWords) {
+			if (w.length <= 2) { matchCount++; continue; }
+			for (let s of spokenWords) {
+				if (s === w || similarity(s, w) >= 0.7) {
+					matchCount++;
+					break;
+				}
+			}
+		}
+		let ratio = matchCount / correctWords.length;
+		if (ratio >= 0.7) return 0.85 + (ratio - 0.7) * 0.3;
+	}
+
+	// Phonetic compare
+	let pS = phoneticNormalize(nS);
+	let pC = phoneticNormalize(nC);
+	let phoneticScore = similarity(pS, pC);
+
+	// Levenshtein similarity
+	let normalScore = similarity(nS, nC);
+
+	// Lấy điểm cao nhất
+	let best = Math.max(normalScore, phoneticScore);
+
+	// Bonus: chênh lệch rất nhỏ
+	let diff = levenshtein(nS, nC);
+	if (diff <= 1) best = Math.max(best, 0.9);
+	else if (diff <= 2) best = Math.max(best, 0.75);
+	else if (diff <= 3) best = Math.max(best, 0.6);
+
+	return best;
+}
+
+// =========================
+// CHECK VOICE
+// =========================
+function checkVoice(spoken, correct, score) {
+	let box = document.getElementById('boxResult');
+	console.log("Score:", score.toFixed(2), "| Said:", spoken, "| Answer:", correct);
+
+	if (score >= 0.45) {
+		box.innerText = "✅ " + correct;
+		box.className = "box-result box-correct";
+		setTimeout(() => nextWord(), 600);
+	} else {
+		box.innerText = "Bạn nói: " + spoken;
+		box.className = "box-result box-wrong";
+		setTimeout(() => {
+			box.innerText = "💡 " + correct;
+			box.className = "box-result";
+		}, 1500);
+	}
+}
+
+// =========================
+// SIMILARITY
+// =========================
+function similarity(a, b) {
+	if (a === b) return 1;
+	if (!a.length || !b.length) return 0;
+	if (a.includes(b) || b.includes(a)) return 0.9;
+
+	let maxLen = Math.max(a.length, b.length);
+	let diff = levenshtein(a, b);
+	return 1 - diff / maxLen;
+}
+
+// =========================
+// LEVENSHTEIN
+// =========================
+function levenshtein(a, b) {
+	const m = [];
+	for (let i = 0; i <= b.length; i++) m[i] = [i];
+	for (let j = 0; j <= a.length; j++) m[0][j] = j;
+
+	for (let i = 1; i <= b.length; i++) {
+		for (let j = 1; j <= a.length; j++) {
+			if (b[i-1] === a[j-1]) {
+				m[i][j] = m[i-1][j-1];
+			} else {
+				m[i][j] = Math.min(m[i-1][j-1]+1, m[i][j-1]+1, m[i-1][j]+1);
+			}
+		}
+	}
+	return m[b.length][a.length];
+}
+
+// =========================
+// NEXT / BACK
+// =========================
+function nextWord() {
+	currentIndex++;
+	if (currentIndex >= currentList.length) {
+		document.getElementById('boxVi').innerText = "🎉 Hoàn thành!";
+		document.getElementById('boxResult').innerText = "Bạn giỏi lắm!";
+		document.getElementById('boxResult').className = "box-result box-correct";
+		document.getElementById('counter').innerText = "0 từ còn lại";
+		return;
+	}
+	renderWord();
+}
+
+function backWord() {
+	if (currentIndex > 0) {
+		currentIndex--;
+		renderWord();
+	}
+}
+
+// =========================
+// SHUFFLE
+// =========================
+function shuffleArray(arr) {
+	for (let i = arr.length - 1; i > 0; i--) {
+		let j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+}
+
+// =========================
+// SPEAK
+// =========================
+function speakCurrentWord() {
+	let word = currentList[currentIndex]?.en || "";
+	if (!word) return;
+	let u = new SpeechSynthesisUtterance(word);
+	u.lang = "en-US";
+	u.rate = 0.85;
+	speechSynthesis.speak(u);
+}
+
+</script>
+</body>
+</html>

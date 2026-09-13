@@ -381,21 +381,39 @@ body{
 	}
 
 	async function getIPA(word){
-  	try{
-    	let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-    	let data = await res.json();
+  try{
+    const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim())}`;
 
-    	if(data[0].phonetics){
-      	for(let p of data[0].phonetics){
-        if(p.text) return p.text;
-      	}
-    	}
+    const res = await fetch(url);
 
-    	return "";
-  	}catch(e){
-    	return "";
-  	}
-	}
+    if(!res.ok){
+      console.log("IPA API error:", res.status, word);
+      return "";
+    }
+
+    const data = await res.json();
+
+    // Ưu tiên phonetic ở cấp chính
+    if(data[0]?.phonetic){
+      return data[0].phonetic;
+    }
+
+    // Nếu không có thì tìm trong phonetics
+    if(data[0]?.phonetics){
+      for(const p of data[0].phonetics){
+        if(p.text){
+          return p.text;
+        }
+      }
+    }
+
+    return "";
+
+  }catch(e){
+    console.log("IPA error:", e);
+    return "";
+  }
+}
 
 	function backWord() {
   	if(currentList.length === 0) return;

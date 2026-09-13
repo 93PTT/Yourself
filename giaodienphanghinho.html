@@ -381,38 +381,40 @@ body{
 	}
 
 	async function getIPA(word){
-  try{
-    const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim())}`;
+    try {
+        const url =
+            `https://api.datamuse.com/words?sp=${encodeURIComponent(word.trim())}&md=r&ipa=1`;
 
-    const res = await fetch(url);
+        const res = await fetch(url);
 
-    if(!res.ok){
-      console.log("IPA API error:", res.status, word);
-      return "";
-    }
-
-    const data = await res.json();
-
-    // Ưu tiên phonetic ở cấp chính
-    if(data[0]?.phonetic){
-      return data[0].phonetic;
-    }
-
-    // Nếu không có thì tìm trong phonetics
-    if(data[0]?.phonetics){
-      for(const p of data[0].phonetics){
-        if(p.text){
-          return p.text;
+        if(!res.ok){
+            console.log("Datamuse error:", res.status);
+            return "";
         }
-      }
+
+        const data = await res.json();
+
+        if(data.length === 0){
+            console.log("Không tìm thấy:", word);
+            return "";
+        }
+
+        if(data[0].tags){
+            const ipa = data[0].tags.find(tag =>
+                tag.startsWith("ipa_pron:")
+            );
+
+            if(ipa){
+                return "/" + ipa.replace("ipa_pron:", "").trim() + "/";
+            }
+        }
+
+        return "";
+
+    } catch(e){
+        console.log("IPA error:", e);
+        return "";
     }
-
-    return "";
-
-  }catch(e){
-    console.log("IPA error:", e);
-    return "";
-  }
 }
 
 	function backWord() {

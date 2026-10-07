@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Thêm câu mới</title>
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
+<style>
+	*{box-sizing:border-box;margin:0;padding:0;}
+
+
+	body{
+		margin:0;
+		overflow:hidden;
+		font-family:sans-serif;
+		background-image:url("nen1.png");
+		background-size:cover;
+		background-position:center;
+		background-repeat:no-repeat;}
+
+
+	.overlay{
+		position:fixed;
+		inset:0;
+		background:rgba(0,0,0,0.25);
+		z-index:-1;}
+
+
+	.app-container{
+		max-width:375px;
+		margin:auto;
+		height:100vh;
+		display:flex;
+		justify-content:center;
+		align-items:center;
+		padding-top:env(safe-area-inset-top);
+		padding-bottom:env(safe-area-inset-bottom);
+		padding-left:10px;
+		padding-right:10px;}
+
+	.card-1{
+		width:100%;
+		height:600px;
+		border-radius:20px;
+		background:transparent;
+		display:flex;
+		justify-content:center;
+		align-items:flex-start;
+		transform:translateY(-30px);}
+
+
+	.card-2{
+		width:300px;
+		height:260px;
+		padding:15px;
+		margin-top:0px;
+		border-radius:20px;
+		position:relative;
+		box-shadow:0 8px 20px rgba(0,0,0,0.3);
+		display:flex;
+		flex-direction:column;
+		gap:20px;}
+
+
+
+	.group-en textarea,
+	.group-vi textarea{
+  		transition: all 0.25s ease;
+  		position: relative;}
+
+
+
+	textarea.expanded{
+  		height:55vh !important;
+  		max-height:none !important;
+  		z-index:10;
+  		transform:scale(1.02);}
+
+
+
+	.group-name input{
+		display: block;
+  		width:70%;
+		margin:0 auto;
+		text-align: center;
+  		height:40px;
+  		padding:8px;
+  		border-radius:12px;
+  		border:1px solid #ddd;
+		font-size: 15px;}
+
+
+
+	.group-en textarea{
+  		width:100%;
+  		height:40px;
+  		padding:8px;
+  		border-radius:12px;
+  		border:1px solid #ddd;
+  		font-size:15px;
+  		resize:none;
+  		transition: all 0.25s ease;}
+
+
+
+
+	.group-vi textarea{
+  		width:100%;
+  		height:40px;
+  		padding:8px;
+  		border-radius:12px;
+  		border:1px solid #ddd;
+  		font-size:15px;
+  		resize:none;
+  		transition: all 0.25s ease;}
+		
+
+
+
+	textarea {
+  		min-height: 40px;
+  		max-height: none;
+  		resize: none;
+  		transition: all 0.25s ease;}
+
+
+
+
+	.btn {
+  		width: 60%;
+		margin: 10px auto 0;
+  		padding: 10px;
+  		border-radius: 15px;
+  		border: none;
+  		font-weight: 600;
+  		cursor: pointer;
+  		background: gainsboro;
+  		transition: all 0.15s ease;
+  		font-size: 15px;
+  		color: #555;
+  		margin-top: 0px;}
+	.btn:hover {
+  		filter: brightness(0.95);
+  		transform: translateY(-2px);}
+	.btn:active {
+  		transform: scale(0.97);
+  		filter: brightness(0.9);}
+
+
+
+
+	#saveMessage {
+  		position: fixed;
+  		top: 0;
+  		left: 0;
+  		width: 100%;
+  		height: 100%;
+  		display: none;
+  		justify-content: center;
+  		align-items: center;
+  		background: rgba(0,0,0,0.3);
+  		z-index: 999;}
+
+
+
+
+	.saved-box {
+  		padding: 20px 30px;
+  		border-radius: 15px;
+  		background: white;
+  		font-size: 16px;
+  		font-weight: 600;
+  		color: #065f46;
+  		box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  		animation: pop 0.3s ease;}
+
+
+
+
+	@keyframes pop{
+  		from{transform: scale(0.8);opacity: 0;}
+  		to{transform: scale(1);opacity: 1;}}
+
+
+
+
+</style>
+</head>
+<body>
+	<div class="overlay"></div>
+		<div class="app-container">
+		<div class="card-1">
+			<div class="card-2">
+  				<div class="group-name" style="text-align:center;color:white;font-weight:700">Thêm câu mới</div>
+  				<div class="group-en"><textarea id="englishWords" placeholder="Câu tiếng Anh"></textarea></div>
+  				<div class="group-vi"><textarea id="vietnameseWords" placeholder="Nghĩa của câu tiếng Việt"></textarea></div>
+  				<button class="btn" onclick="saveList()">💾 Lưu câu mới</button>
+			</div>
+	</div>
+	</div>
+
+
+
+	<div id="saveMessage">
+  		<div class="saved-box">✅ Đã lưu câu mới!</div>
+		</div>
+
+
+
+<script>
+	function saveList(){
+		const en=document.getElementById('englishWords').value.split('\n').map(x=>x.trim()).filter(Boolean);
+		const vi=document.getElementById('vietnameseWords').value.split('\n').map(x=>x.trim()).filter(Boolean);
+		if(!en.length||!vi.length){alert('Vui lòng nhập ít nhất một câu tiếng Anh và nghĩa tiếng Việt');return;}
+		if(en.length!==vi.length){alert('Số dòng câu tiếng Anh và nghĩa tiếng Việt không khớp!');return;}
+		let lists=[];try{lists=JSON.parse(localStorage.getItem('sentenceLists')||'[]');}catch{}
+		const names=['Từ mới','Chưa thuộc','Đã thuộc'];
+		const fixed=names.map(name=>{const found=lists.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});
+		lists.filter(list=>!names.includes(list.name)).forEach(list=>{if(Array.isArray(list.words))fixed[0].words.push(...list.words);});
+		for(let i=0;i<en.length;i++)fixed[0].words.push({en:en[i],vi:vi[i]});
+		localStorage.setItem('sentenceLists',JSON.stringify(fixed));
+		const msg=document.getElementById('saveMessage');msg.style.display='flex';setTimeout(()=>location.href='index.html',1200);
+	}
+	const textareas=document.querySelectorAll('textarea');
+	textareas.forEach(el=>el.addEventListener('focus',()=>{textareas.forEach(t=>t.classList.remove('expanded'));el.classList.add('expanded');}));
+	document.addEventListener('click',e=>{if(!e.target.closest('textarea'))textareas.forEach(t=>t.classList.remove('expanded'));});
+</script>
+</body>
+</html>

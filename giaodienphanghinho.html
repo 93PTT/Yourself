@@ -13,7 +13,8 @@
 <style>
 	html, body {
     height: 100%;
-overflow:hidden;
+    overflow:hidden;
+    background:#d6d2cc url("nen1.png") center center / cover no-repeat fixed;
 }
 
 body{
@@ -259,6 +260,11 @@ body{
 	.confirm-cancel{background:gainsboro;color:#555}
 	.confirm-delete{background:#ff6b6b;color:white}
 	@keyframes pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+	@media (max-width:480px){
+		.app-container{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top) + 8px);padding-bottom:calc(env(safe-area-inset-bottom) + 8px)}
+		.card-1{height:auto;min-height:0;max-height:none;flex:1 1 auto}
+		.card-2{margin-top:16px;margin-bottom:0;flex:0 0 60px}
+	}
 
 
 	

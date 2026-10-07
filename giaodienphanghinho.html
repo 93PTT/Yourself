@@ -73,11 +73,11 @@ body{
 
 	.card-1{
 		width:350px;
-		height:450px;
+		height:520px;
 		border-radius:20px;
 		position:relative;
 		box-shadow:0 8px 20px rgba(0,0,0,0.3);
-		transform: translateY(-100px);}
+		transform: translateY(-35px);}
 
 
 
@@ -153,8 +153,11 @@ body{
 	.box-4{
 		width:200px;
 		height:50px;
+		position:absolute;
+		left:75px;
+		bottom:75px;
 		margin:auto;
-		margin-top:10px;
+		margin-top:0;
 		border-radius:10px;
 		background:#d9d9d9;
 		display:flex;
@@ -201,10 +204,12 @@ body{
 
 
 	.grid-2{
-		display:grid;
-		grid-template-columns:auto auto;
+		display:flex;
 		gap:10px;
 		justify-content:start;}
+	.header-row{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 15px 0 5px;gap:10px}
+	.header-row .button-2{margin:0;flex:0 0 70px}
+	.header-row .box-3{width:90px;flex:0 0 90px;margin:0;text-align:right;white-space:nowrap;font-size:14px;position:relative;left:-18px}
 
 
 
@@ -233,6 +238,18 @@ body{
 	.button-2.active{
   		background: orange;
   		color: white;}
+	.button-delete-current{font-size:17px!important}
+	.word-actions{position:absolute;left:15px;right:15px;bottom:15px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+	.word-actions button{width:100%;height:40px;border:none;outline:none;padding:10px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:whitesmoke;font-size:17px;font-weight:600;color:#555;box-shadow:0 8px 20px rgba(0,0,0,0.38);cursor:pointer;transition:0.2s}
+	.word-actions button:hover{background:orange}
+	.word-actions button:active{transform:scale(0.95)}
+	.confirm-overlay{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,0.3);z-index:999}
+	.confirm-box{padding:20px 24px;border-radius:15px;background:white;font-size:16px;font-weight:600;color:#555;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:pop 0.3s ease;text-align:center;min-width:260px}
+	.confirm-actions{display:flex;gap:10px;margin-top:18px}
+	.confirm-actions button{flex:1;padding:10px;border:0;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+	.confirm-cancel{background:gainsboro;color:#555}
+	.confirm-delete{background:#ff6b6b;color:white}
+	@keyframes pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
 
 
 	
@@ -248,14 +265,21 @@ body{
 	<div class="overlay"></div>
 	<div class="app-container">
 		<div class="card-1">
+			<div class="header-row">
 			<div class="grid-2">
     				<button id="btnAnh" class="button-2 active" onclick="showEnglish()">Anh</button>
 				<button id="btnViet" class="button-2" onclick="showVietnamese()">Việt</button>
-		</div>
+				<button class="button-2 button-delete-current" title="Xóa từ hoặc câu này" onclick="deleteCurrentItem()">Xóa</button>
+			</div>
 			<div class="box box-3" id="btnO3">Từ còn lại</div>
+			</div>
 			<div class="box box-1" id="btnO1">Ô 1</div>
 			<div class="box box-2" id="btnO2">Ô 2</div>
 			<div class="box box-4" id="btnO4">Phiên âm</div>
+		<div class="word-actions">
+			<button onclick="moveCurrentWord('Chưa thuộc')">Chưa thuộc</button>
+			<button onclick="moveCurrentWord('Đã thuộc')">Đã thuộc</button>
+		</div>
 		</div>
 
 		<div class="card-2 grid-1">
@@ -264,23 +288,36 @@ body{
     			<button class="button-1" onclick="nextWord()">Next</button>
 		</div>
 	</div>
+	<div class="confirm-overlay" id="deleteConfirm">
+		<div class="confirm-box">
+			<div id="deleteConfirmText">Xóa mục này khỏi danh sách?</div>
+			<div class="confirm-actions">
+				<button class="confirm-cancel" onclick="closeDeleteConfirm()">Hủy</button>
+				<button class="confirm-delete" onclick="confirmDeleteItem()">Xóa</button>
+			</div>
+		</div>
+	</div>
 
 
 
 
 <script>
 	let selectedList = JSON.parse(localStorage.getItem('selectedList'));
+	const selectedKind = localStorage.getItem('selectedKind') || 'word';
+	const storageKey = selectedKind === 'sentence' ? 'sentenceLists' : 'wordLists';
 	let currentList = selectedList?.words || [];
 	shuffleArray(currentList);
 
-	let currentIndex = 0;
-	let mode = 'en';
-	let showAnswer = false;
+let currentIndex = 0;
+let mode = 'en';
+let showAnswer = false;
+let renderVersion = 0;
 
 
-	async function renderWord(){
+async function renderWord(){
+	const version = ++renderVersion;
   	if(currentList.length === 0){
-    	document.getElementById('btnO1').innerText = "Không có dữ liệu";
+	    	document.getElementById('btnO1').innerText = selectedKind==='sentence' ? 'Chưa có câu trong danh sách này' : 'Không có dữ liệu';
     	document.getElementById('btnO2').innerText = "";
     	return;
   	}
@@ -299,6 +336,8 @@ body{
 
 
 	let ipa = await getIPA(word.en);
+	// Không để phản hồi mạng cũ ghi đè từ hiện tại khi người dùng chuyển nhanh.
+	if (version !== renderVersion) return;
 	let ipaText = "";
 
 	if(mode === 'en'){
@@ -311,7 +350,7 @@ body{
 
 
   	document.getElementById('btnO3').innerText =
-    	`Còn ${currentList.length - currentIndex - 1} từ`;
+	    	`Còn ${currentList.length - currentIndex - 1} ${selectedKind==='sentence'?'câu':'từ'}`;
 	}
 
 
@@ -324,10 +363,9 @@ body{
     	if(currentIndex < currentList.length - 1){
       	currentIndex++;
       	showAnswer = false;
-    	} else {
-
-      	launchFireworks();
-      	return;
+		} else {
+		  finishLesson();
+		  return;
     	}
   	}
 
@@ -374,7 +412,8 @@ body{
 
   	let word = currentList[currentIndex].en;
 
-  	let utterance = new SpeechSynthesisUtterance(word);
+	speechSynthesis.cancel();
+	let utterance = new SpeechSynthesisUtterance(word);
   	utterance.lang = 'en-US';
 
   	speechSynthesis.speak(utterance);
@@ -417,6 +456,13 @@ body{
     }
 }
 
+	function finishLesson(){
+		document.getElementById('btnO1').innerText = '🎉 Hoàn thành!';
+		document.getElementById('btnO2').innerText = 'Bạn đã ôn hết danh sách.';
+		document.getElementById('btnO3').innerText = selectedKind==='sentence' ? '0 câu còn lại' : '0 từ còn lại';
+		document.getElementById('btnO4').innerText = '';
+	}
+
 	function backWord() {
   	if(currentList.length === 0) return;
 
@@ -432,6 +478,48 @@ body{
   	}
 
   	renderWord();
+	}
+
+	function moveCurrentWord(targetName){
+		if(!currentList.length) return;
+		const word=currentList[currentIndex];
+		let lists=[];try{lists=JSON.parse(localStorage.getItem(storageKey)||'[]');}catch{}
+		const names=['Từ mới','Chưa thuộc','Đã thuộc'];
+		const fixed=names.map(name=>{const found=lists.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});
+		const sourceName=selectedList?.name||'Từ mới';
+		if(sourceName===targetName) return;
+		const source=fixed.find(list=>list.name===sourceName);
+		const target=fixed.find(list=>list.name===targetName);
+		if(source){const i=source.words.findIndex(item=>item.en===word.en&&item.vi===word.vi);if(i>=0)source.words.splice(i,1);}
+		target.words.push(word);
+		localStorage.setItem(storageKey,JSON.stringify(fixed));
+		currentList.splice(currentIndex,1);
+		if(currentIndex>=currentList.length)currentIndex=Math.max(0,currentList.length-1);
+		showAnswer=false;renderWord();
+	}
+
+	function deleteCurrentItem(){
+		if(!currentList.length) return;
+		const unit=selectedKind==='sentence'?'câu':'từ';
+		document.getElementById('deleteConfirmText').innerText=`Xóa ${unit} này khỏi danh sách?`;
+		document.getElementById('deleteConfirm').style.display='flex';
+	}
+
+	function closeDeleteConfirm(){document.getElementById('deleteConfirm').style.display='none';}
+
+	function confirmDeleteItem(){
+		if(!currentList.length){closeDeleteConfirm();return;}
+		const item=currentList[currentIndex];
+		let lists=[];try{lists=JSON.parse(localStorage.getItem(storageKey)||'[]');}catch{}
+		const source=lists.find(list=>list.name===selectedList?.name);
+		if(source&&Array.isArray(source.words)){
+			const index=source.words.findIndex(entry=>entry.en===item.en&&entry.vi===item.vi);
+			if(index>=0)source.words.splice(index,1);
+			localStorage.setItem(storageKey,JSON.stringify(lists));
+		}
+		currentList.splice(currentIndex,1);
+		if(currentIndex>=currentList.length)currentIndex=Math.max(0,currentList.length-1);
+		showAnswer=false;closeDeleteConfirm();renderWord();
 	}
 
 

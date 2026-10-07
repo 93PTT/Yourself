@@ -196,19 +196,6 @@
 	<div class="popup-overlay" id="popup">
 	<div class="popup" id="listContainer"></div>
 	</div>
-	<div class="popup-overlay" id="deletePopup">
-	  	<div class="popup">
-    		<div style="text-align:center; margin-bottom:15px; font-weight:600;">
-      		Xóa danh sách này?
-    	</div>
-
-
-
-    	<div style="display:flex; gap:10px;">
-      		<button class="btn-cancel" onclick="closeDeletePopup()">Hủy</button>
-      		<button class="btn-delete" onclick="confirmDelete()">Xóa</button></div>
-    	</div>
-  </div>
 
 
 
@@ -216,145 +203,34 @@
 
 
 <script>
+	const LIST_NAMES = ['Từ mới', 'Chưa thuộc', 'Đã thuộc'];
 	let selectedMode = null;
-	let wordLists = JSON.parse(localStorage.getItem('wordLists') || '[]');
-
-
-
-	function chooseMode(mode){
-		selectedMode = mode;
-		openPopup();}
-
-
-
-	function openPopup(){
-		renderLists();
-		document.getElementById("popup").style.display = "flex";}
-
-
-
-
-	function closePopup(){
-		document.getElementById("popup").style.display = "none";}
-		document.getElementById("popup").addEventListener("click", function(e){
-		if(e.target.id === "popup"){closePopup();}});
-
-
-
-
-
-	function renderLists(){
-		const container = document.getElementById("listContainer");
-		container.innerHTML = "";
-		const createBtn = document.createElement("div");
-		createBtn.className = "item";
-		createBtn.innerText = "➕ Tạo danh sách mới";
-		createBtn.style.fontWeight = "600";
-		createBtn.onclick = () => {
-		window.location.href = "taodanhsachtu.html";};
-		container.appendChild(createBtn);
-		if(wordLists.length === 0){
-		const empty = document.createElement("div");
-		empty.className = "item";
-		empty.innerText = "Chưa có danh sách";
-		container.appendChild(empty);
-		return;}
-		wordLists.forEach((list, index)=>{
-		const row = document.createElement("div");
-		row.className = "item";
-		row.style.display = "flex";
-		row.style.alignItems = "center";
-		row.style.gap = "10px";
-		const editBtn = document.createElement("span");
-		editBtn.innerText = "✏️";
-		editBtn.style.cursor = "pointer";
-		editBtn.style.flexShrink = "0";
-		editBtn.onclick = (e) => {
-			e.stopPropagation();
-			editList(index);};
-		const name = document.createElement("span");
-		name.innerText = list.name;
-		name.style.flex = "1";
-		name.style.textAlign = "center";
-		name.onclick = () => selectList(list);
-		const deleteBtn = document.createElement("span");
-		deleteBtn.innerText = "🗑";
-		deleteBtn.style.cursor = "pointer";
-		deleteBtn.style.flexShrink = "0";
-		deleteBtn.onclick = (e) => {
-		e.stopPropagation();
-		openDeletePopup(index);};
-		editBtn.onmouseover = () => editBtn.style.transform = "scale(1.2)";
-		editBtn.onmouseout  = () => editBtn.style.transform = "scale(1)";
-		deleteBtn.onmouseover = () => deleteBtn.style.transform = "scale(1.2)";
-		deleteBtn.onmouseout  = () => deleteBtn.style.transform = "scale(1)";
-		row.appendChild(editBtn);
-		row.appendChild(name);
-		row.appendChild(deleteBtn);
-		container.appendChild(row);});}
-
-
-
-
-	function deleteList(index){
-		if(!confirm("Xóa danh sách này?")) return;
-		wordLists.splice(index, 1);
-		localStorage.setItem("wordLists", JSON.stringify(wordLists));
-		renderLists(); // render lại
+	let selectedKind = 'word';
+	function readWordLists(){try{const lists=JSON.parse(localStorage.getItem('wordLists')||'[]');return Array.isArray(lists)?lists:[];}catch{return [];}}
+	function normalizeLists(){
+		const old=readWordLists();
+		const fixed=LIST_NAMES.map(name=>{const found=old.find(list=>list.name===name&&Array.isArray(list.words));return {name,words:found?found.words:[]};});
+		old.filter(list=>!LIST_NAMES.includes(list.name)).forEach(list=>{if(Array.isArray(list.words))fixed[0].words.push(...list.words);});
+		localStorage.setItem('wordLists',JSON.stringify(fixed));return fixed;
 	}
-
-
-
-
-	function editList(index){
-		localStorage.setItem("editIndex", index);
-		window.location.href = "taodanhsachtu.html";}
-
-
-
-	function selectList(list){
-		localStorage.setItem("selectedList", JSON.stringify(list));
-		localStorage.setItem("selectedMode", selectedMode);
-		closePopup();
-		goToLesson();}
-
-
-
-	function goToLesson(){
-		if(selectedMode === "spell"){
-			window.location.href = "giaodienphanchinhta.html";}
-		else if(selectedMode === "memorize"){
-			window.location.href = "giaodienphanghinho.html";}
-		else if(selectedMode === "listen"){
-			window.location.href = "giaodienphannghe.html";}
-		else if(selectedMode === "pronounce"){
-			window.location.href = "giaodienphanphatam.html";}}
-
-	let deleteIndex = null;
-
-
-
-	function openDeletePopup(index){
-  		deleteIndex = index;
-  		document.getElementById("deletePopup").style.display = "flex";}
-
-
-
-	function closeDeletePopup(){
-  	document.getElementById("deletePopup").style.display = "none";}
-
-
-
-
-	function confirmDelete(){
-  		if(deleteIndex === null) return;
-  		wordLists.splice(deleteIndex, 1);
-  		localStorage.setItem("wordLists", JSON.stringify(wordLists));
-		closeDeletePopup();
-		renderLists();}
-
-
-
+	let wordLists=normalizeLists();
+	function chooseMode(mode){selectedMode=mode;renderMemorizeChoices();document.getElementById('popup').style.display='flex';}
+	function openPopup(){wordLists=normalizeLists();renderLists();document.getElementById('popup').style.display='flex';}
+	function closePopup(){document.getElementById('popup').style.display='none';}
+	document.getElementById('popup').addEventListener('click',e=>{if(e.target.id==='popup')closePopup();});
+	function renderMemorizeChoices(){const c=document.getElementById('listContainer');c.innerHTML='';['Học từ','Học câu'].forEach((label,i)=>{const row=document.createElement('div');row.className='item';row.innerText=label;row.onclick=()=>{selectedKind=i===0?'word':'sentence';localStorage.setItem('selectedKind',selectedKind);openPopup();};c.appendChild(row);});}
+	function renderLists(){
+		const container=document.getElementById('listContainer');container.innerHTML='';
+		let lists=wordLists;
+		if(selectedMode==='memorize'&&selectedKind==='sentence'){
+			try{const saved=JSON.parse(localStorage.getItem('sentenceLists')||'[]');lists=LIST_NAMES.map(name=>{const found=saved.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});localStorage.setItem('sentenceLists',JSON.stringify(lists));}catch{lists=LIST_NAMES.map(name=>({name,words:[]}));}
+		}
+		const add=document.createElement('div');add.className='item';add.innerText=selectedKind==='sentence'?'➕ Thêm câu mới':'➕ Thêm từ mới';add.style.fontWeight='600';add.onclick=()=>window.location.href=selectedKind==='sentence'?'taocau.html':'taodanhsachtu.html';container.appendChild(add);
+		lists.forEach(list=>{const row=document.createElement('div');row.className='item';row.innerText=`${list.name} (${list.words.length})`;row.onclick=()=>selectList(list);container.appendChild(row);});
+	}
+	function selectList(list){localStorage.setItem('selectedList',JSON.stringify(list));localStorage.setItem('selectedMode',selectedMode);localStorage.setItem('selectedKind',selectedKind);closePopup();goToLesson();}
+	function goToLesson(){if(selectedMode==='spell')location.href='giaodienphanchinhta.html';else if(selectedMode==='memorize')location.href='giaodienphanghinho.html';else if(selectedMode==='listen')location.href='giaodienphannghe.html';else if(selectedMode==='pronounce')location.href='giaodienphanphatam.html';}
+	document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
 </script>
 </body>
 </html>

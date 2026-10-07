@@ -226,9 +226,11 @@
 // LOAD DATA
 // =========================
 let selectedList = JSON.parse(localStorage.getItem('selectedList'));
+const selectedKind = localStorage.getItem('selectedKind') || 'word';
 let currentList = selectedList?.words || [];
 shuffleArray(currentList);
 let currentIndex = 0;
+let advanceTimer = null;
 
 renderWord();
 
@@ -250,7 +252,7 @@ function renderWord() {
 	boxVi.innerText = word.vi || "";
 	boxResult.innerText = "🔊 Chạm để nghe";
 	boxResult.className = "box-result";
-	counter.innerText = (currentList.length - currentIndex) + " từ còn lại";
+		counter.innerText = (currentList.length - currentIndex) + (selectedKind==='sentence' ? " câu còn lại" : " từ còn lại");
 }
 
 // =========================
@@ -312,7 +314,13 @@ function startVoice() {
 	btnMic.classList.add('listening');
 	document.getElementById('boxResult').innerText = "🎧 Đang nghe...";
 
-	recognition.start();
+	try {
+		recognition.start();
+	} catch (error) {
+		btnMic.classList.remove('listening');
+		document.getElementById('boxResult').innerText = "Không thể khởi động micro, thử lại";
+		return;
+	}
 
 	recognition.onresult = function(event) {
 		btnMic.classList.remove('listening');
@@ -401,7 +409,8 @@ function checkVoice(spoken, correct, score) {
 	if (score >= 0.45) {
 		box.innerText = "✅ " + correct;
 		box.className = "box-result box-correct";
-		setTimeout(() => nextWord(), 600);
+		clearTimeout(advanceTimer);
+		advanceTimer = setTimeout(() => nextWord(), 600);
 	} else {
 		box.innerText = "Bạn nói: " + spoken;
 		box.className = "box-result box-wrong";
@@ -449,18 +458,20 @@ function levenshtein(a, b) {
 // NEXT / BACK
 // =========================
 function nextWord() {
+	clearTimeout(advanceTimer);
 	currentIndex++;
 	if (currentIndex >= currentList.length) {
 		document.getElementById('boxVi').innerText = "🎉 Hoàn thành!";
 		document.getElementById('boxResult').innerText = "Bạn giỏi lắm!";
 		document.getElementById('boxResult').className = "box-result box-correct";
-		document.getElementById('counter').innerText = "0 từ còn lại";
+		document.getElementById('counter').innerText = selectedKind==='sentence' ? "0 câu còn lại" : "0 từ còn lại";
 		return;
 	}
 	renderWord();
 }
 
 function backWord() {
+	clearTimeout(advanceTimer);
 	if (currentIndex > 0) {
 		currentIndex--;
 		renderWord();

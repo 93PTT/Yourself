@@ -183,10 +183,12 @@ body{
 <script>
 
 let selectedList = JSON.parse(localStorage.getItem('selectedList'));
+const selectedKind = localStorage.getItem('selectedKind') || 'word';
 let currentList = selectedList?.words || [];
 
 shuffleArray(currentList);
 let currentIndex = 0;
+let isShowingFeedback = false;
 
 /* ================= RENDER ================= */
 function renderWord(){
@@ -202,7 +204,7 @@ function renderWord(){
     document.getElementById("btnO1").innerText = word.vi;
 
     document.getElementById("btnO3").innerText =
-        `Còn ${currentList.length - currentIndex - 1} từ`;
+        `Còn ${currentList.length - currentIndex - 1} ${selectedKind==='sentence'?'câu':'từ'}`;
 
     // CHỈ reset value, KHÔNG tạo input mới
     const input = document.getElementById("answerInput");
@@ -221,6 +223,8 @@ function renderWord(){
 /* ================= CHECK ================= */
 function handleEnter(e){
     if(e.key!== "Enter") return;
+	if(isShowingFeedback || !currentList.length || currentIndex >= currentList.length) return;
+	isShowingFeedback = true;
 
     let word = currentList[currentIndex];
     let input = document.getElementById("answerInput").value.trim();
@@ -231,6 +235,7 @@ function handleEnter(e){
         feedback.className = "feedback correct";
 
         setTimeout(()=>{
+			isShowingFeedback = false;
             nextWord();
         },700);
 
@@ -243,6 +248,7 @@ function handleEnter(e){
         currentList.splice(newPos,0,wrongWord);
 
         setTimeout(()=>{
+			isShowingFeedback = false;
             renderWord();
         },1500);
     }

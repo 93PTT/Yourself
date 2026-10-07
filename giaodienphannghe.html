@@ -116,6 +116,7 @@ const btn = document.getElementById("btn-control");
 
 let list = [];
 let index = 0;
+const selectedKind = localStorage.getItem('selectedKind') || 'word';
 
 let isPlaying = false;
 let isPaused = false;
@@ -173,7 +174,7 @@ function loadData(){
     }
 
     list = selected.words;
-    box2.textContent = "Start: " + list.length;
+    box2.textContent = "Start: " + list.length + (selectedKind === 'sentence' ? " câu" : " từ");
 
   } catch (e) {
     box2.textContent = "LOAD ERROR";
@@ -279,6 +280,8 @@ function start(){
   if(index >= list.length){
     index = 0;
   }
+
+  isPaused = false;
 
   keepScreenOn(); // 🔥 chỉ giữ khi bắt đầu
 

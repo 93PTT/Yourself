@@ -194,10 +194,10 @@
 		<div class="app-container">
 		<div class="card-1">
 			<div class="card-2">
-  				<div class="group-name"><input type="text" id="listName" placeholder="Tên danh sách"></div>
+  				<div class="group-name" style="text-align:center;color:white;font-weight:700">Thêm từ mới</div>
   				<div class="group-en"><textarea id="englishWords" placeholder="Từ tiếng Anh"></textarea></div>
   				<div class="group-vi"><textarea id="vietnameseWords" placeholder="Nghĩa tiếng Việt"></textarea></div>
-  				<button class="btn" onclick="saveList()">💾Lưu danh sách</button>
+  				<button class="btn" onclick="saveList()">💾 Lưu từ mới</button>
 			</div>
 	</div>
 	</div>
@@ -211,59 +211,22 @@
 
 
 <script>
-	let editIndex = localStorage.getItem("editIndex");
-	if(editIndex !== null){
-	let allLists = JSON.parse(localStorage.getItem('wordLists') || '[]');
-	let list = allLists[editIndex];
-
-	if(list){
-		document.getElementById('listName').value = list.name;
-		document.getElementById('englishWords').value =
-			list.words.map(w => w.en).join("\n");
-		document.getElementById('vietnameseWords').value =
-			list.words.map(w => w.vi).join("\n");}}
-
-
-
 	function saveList(){
-  		const name = document.getElementById('listName').value.trim();
-  		const en = document.getElementById('englishWords').value.trim().split('\n');
-  		const vi = document.getElementById('vietnameseWords').value.trim().split('\n');
-  		if(!name){alert("Vui lòng nhập tên danh sách");return;}
-		if(en.length !== vi.length){alert("Số dòng không khớp!");return;}
-  		let result = [];
-  		for(let i = 0; i < en.length; i++){
-    		result.push({ en: en[i], vi: vi[i] });}
-  		let allLists = JSON.parse(localStorage.getItem('wordLists') || '[]');
-  		if(editIndex !== null){
-		allLists[editIndex] = { name: name, words: result };
-		localStorage.removeItem("editIndex");} 
-		else {
-		allLists.push({ name: name, words: result });
-		localStorage.setItem('wordLists', JSON.stringify(allLists));}
-
-  		const msg = document.getElementById('saveMessage');
-  		msg.style.display = 'flex';
-
-  		setTimeout(() => {
-    		window.location.href = "index.html";}, 2000);}
-
-
-	const textareas = document.querySelectorAll("textarea");
-
-	textareas.forEach(el => {
-  	el.addEventListener("focus", () => {
-
-    	textareas.forEach(t => t.classList.remove("expanded"));
-
-
-    	el.classList.add("expanded");});});
-
-
-	document.addEventListener("click", (e) => {
-  	if(!e.target.closest("textarea")){
-    	textareas.forEach(t => t.classList.remove("expanded"));}});
-
+		const en=document.getElementById('englishWords').value.split('\n').map(x=>x.trim()).filter(Boolean);
+		const vi=document.getElementById('vietnameseWords').value.split('\n').map(x=>x.trim()).filter(Boolean);
+		if(!en.length||!vi.length){alert('Vui lòng nhập ít nhất một từ và một nghĩa');return;}
+		if(en.length!==vi.length){alert('Số dòng không khớp!');return;}
+		let lists=[];try{lists=JSON.parse(localStorage.getItem('wordLists')||'[]');}catch{}
+		const names=['Từ mới','Chưa thuộc','Đã thuộc'];
+		const fixed=names.map(name=>{const found=lists.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});
+		lists.filter(list=>!names.includes(list.name)).forEach(list=>{if(Array.isArray(list.words))fixed[0].words.push(...list.words);});
+		for(let i=0;i<en.length;i++)fixed[0].words.push({en:en[i],vi:vi[i]});
+		localStorage.setItem('wordLists',JSON.stringify(fixed));
+		const msg=document.getElementById('saveMessage');msg.style.display='flex';setTimeout(()=>location.href='index.html',1200);
+	}
+	const textareas=document.querySelectorAll('textarea');
+	textareas.forEach(el=>el.addEventListener('focus',()=>{textareas.forEach(t=>t.classList.remove('expanded'));el.classList.add('expanded');}));
+	document.addEventListener('click',e=>{if(!e.target.closest('textarea'))textareas.forEach(t=>t.classList.remove('expanded'));});
 </script>
 </body>
 </html>

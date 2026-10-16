@@ -115,11 +115,21 @@ const box2 = document.getElementById("box-2");
 const btn = document.getElementById("btn-control");
 
 let list = [];
+let playOrder = [];
 let index = 0;
 const selectedKind = localStorage.getItem('selectedKind') || 'word';
 
 let isPlaying = false;
 let isPaused = false;
+
+function shuffled(items){
+  const result = [...items];
+  for(let i = result.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 /* =========================
    WAKE LOCK (FIXED)
@@ -154,10 +164,11 @@ function releaseScreen(){
   }
 }
 
-// 👉 rời app thì thả luôn (tránh hao pin)
+// iOS releases Screen Wake Lock when the page is backgrounded. Reacquire
+// it when Chrome becomes visible again; it cannot prevent a manual lock.
 document.addEventListener("visibilitychange", () => {
-  if(document.visibilityState === "hidden"){
-    releaseScreen();
+  if(document.visibilityState === "visible" && isPlaying && !isPaused){
+    keepScreenOn();
   }
 });
 
@@ -174,7 +185,7 @@ function loadData(){
     }
 
     list = selected.words;
-    box2.textContent = "Start: " + list.length + (selectedKind === 'sentence' ? " câu" : " từ");
+    box2.textContent = "Sẵn sàng: " + list.length + (selectedKind === 'sentence' ? " câu" : " từ");
 
   } catch (e) {
     box2.textContent = "LOAD ERROR";
@@ -182,9 +193,9 @@ function loadData(){
 }
 
 /* =========================
-   SPEAK (TTS)
+   SPEAK (ENGLISH ONLY)
 ========================= */
-function speak(text, lang){
+function speak(text){
   return new Promise(resolve => {
 
     if(!text){
@@ -196,7 +207,7 @@ function speak(text, lang){
 
     const u = new SpeechSynthesisUtterance(text);
 
-    u.lang = lang || "en-US";
+    u.lang = "en-US";
     u.rate = 1;
     u.pitch = 1;
     u.volume = 1;
@@ -241,26 +252,22 @@ async function run(){
 
   isPlaying = true;
 
-  while(index < list.length && isPlaying){
+  while(index < playOrder.length && isPlaying){
 
     if(isPaused) await waitUntilResume();
 
-    const item = list[index];
+    const item = playOrder[index];
 
     box2.textContent = item.en;
 
-    await speak(item.en, "en-US");
-    await delay(300);
-
-    if(isPaused) await waitUntilResume();
-
-    await speak(item.vi, "vi-VN");
-    await delay(500);
+    await speak(item.en);
+    if(!isPlaying) break;
+    await delay(4000);
 
     index++;
   }
 
-  if(index >= list.length){
+  if(isPlaying && index >= playOrder.length){
     box2.textContent = "FINISH";
     isPlaying = false;
     btn.textContent = "Start";
@@ -282,8 +289,11 @@ function start(){
   }
 
   isPaused = false;
+  if(index === 0){
+    playOrder = shuffled(list);
+  }
 
-  keepScreenOn(); // 🔥 chỉ giữ khi bắt đầu
+  keepScreenOn();
 
   // unlock iOS
   const u = new SpeechSynthesisUtterance(" ");

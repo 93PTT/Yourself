@@ -493,9 +493,9 @@ async function renderWord(){
 		if(!currentList.length) return;
 		const word=currentList[currentIndex];
 		let lists=[];try{lists=JSON.parse(localStorage.getItem(storageKey)||'[]');}catch{}
-		const names=['Từ mới','Chưa thuộc','Đã thuộc'];
+		const names=selectedKind==='sentence'?['Câu mới','Chưa thuộc','Đã thuộc']:['Từ mới','Chưa thuộc','Đã thuộc'];
 		const fixed=names.map(name=>{const found=lists.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});
-		const sourceName=selectedList?.name||'Từ mới';
+		const sourceName=selectedList?.name||(selectedKind==='sentence'?'Câu mới':'Từ mới');
 		if(sourceName===targetName) return;
 		const source=fixed.find(list=>list.name===sourceName);
 		const target=fixed.find(list=>list.name===targetName);

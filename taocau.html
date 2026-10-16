@@ -217,9 +217,9 @@
 		if(!en.length||!vi.length){alert('Vui lòng nhập ít nhất một câu tiếng Anh và nghĩa tiếng Việt');return;}
 		if(en.length!==vi.length){alert('Số dòng câu tiếng Anh và nghĩa tiếng Việt không khớp!');return;}
 		let lists=[];try{lists=JSON.parse(localStorage.getItem('sentenceLists')||'[]');}catch{}
-		const names=['Từ mới','Chưa thuộc','Đã thuộc'];
-		const fixed=names.map(name=>{const found=lists.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});
-		lists.filter(list=>!names.includes(list.name)).forEach(list=>{if(Array.isArray(list.words))fixed[0].words.push(...list.words);});
+		const names=['Câu mới','Chưa thuộc','Đã thuộc'];
+		const fixed=names.map((name,i)=>{const found=lists.find(list=>list.name===name)||(i===0?lists.find(list=>list.name==='Từ mới'):null);return {name,words:Array.isArray(found?.words)?found.words:[]};});
+		lists.filter(list=>!names.includes(list.name)&&list.name!=='Từ mới').forEach(list=>{if(Array.isArray(list.words))fixed[0].words.push(...list.words);});
 		for(let i=0;i<en.length;i++)fixed[0].words.push({en:en[i],vi:vi[i]});
 		localStorage.setItem('sentenceLists',JSON.stringify(fixed));
 		const msg=document.getElementById('saveMessage');msg.style.display='flex';setTimeout(()=>location.href='index.html',1200);

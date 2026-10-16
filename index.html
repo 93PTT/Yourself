@@ -204,8 +204,9 @@
 
 <script>
 	const LIST_NAMES = ['Từ mới', 'Chưa thuộc', 'Đã thuộc'];
+	const SENTENCE_LIST_NAMES = ['Câu mới', 'Chưa thuộc', 'Đã thuộc'];
 	let selectedMode = null;
-	let selectedKind = 'word';
+	let selectedKind = localStorage.getItem('selectedKind') || 'word';
 	function readWordLists(){try{const lists=JSON.parse(localStorage.getItem('wordLists')||'[]');return Array.isArray(lists)?lists:[];}catch{return [];}}
 	function normalizeLists(){
 		const old=readWordLists();
@@ -222,8 +223,15 @@
 	function renderLists(){
 		const container=document.getElementById('listContainer');container.innerHTML='';
 		let lists=wordLists;
-		if(selectedMode==='memorize'&&selectedKind==='sentence'){
-			try{const saved=JSON.parse(localStorage.getItem('sentenceLists')||'[]');lists=LIST_NAMES.map(name=>{const found=saved.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});localStorage.setItem('sentenceLists',JSON.stringify(lists));}catch{lists=LIST_NAMES.map(name=>({name,words:[]}));}
+		if(selectedKind==='sentence'){
+			try{
+				const saved=JSON.parse(localStorage.getItem('sentenceLists')||'[]');
+				lists=SENTENCE_LIST_NAMES.map((name,i)=>{
+					const found=saved.find(list=>list.name===name) || (i===0?saved.find(list=>list.name==='Từ mới'):null);
+					return {name,words:Array.isArray(found?.words)?found.words:[]};
+				});
+				localStorage.setItem('sentenceLists',JSON.stringify(lists));
+			}catch{lists=SENTENCE_LIST_NAMES.map(name=>({name,words:[]}));}
 		}
 		const add=document.createElement('div');add.className='item';add.innerText=selectedKind==='sentence'?'➕ Thêm câu mới':'➕ Thêm từ mới';add.style.fontWeight='600';add.onclick=()=>window.location.href=selectedKind==='sentence'?'taocau.html':'taodanhsachtu.html';container.appendChild(add);
 		lists.forEach(list=>{const row=document.createElement('div');row.className='item';row.innerText=`${list.name} (${list.words.length})`;row.onclick=()=>selectList(list);container.appendChild(row);});

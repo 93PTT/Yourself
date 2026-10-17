@@ -247,12 +247,14 @@ body{
 	.word-actions button{width:100%;height:40px;border:none;outline:none;padding:10px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#6bc5ff;font-size:17px;font-weight:600;color:#555;box-shadow:0 8px 20px rgba(0,0,0,0.38);cursor:pointer;transition:0.2s}
 	.word-actions button:hover{background:orange}
 	.word-actions button:active{transform:scale(0.95)}
+	.word-actions button{touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 	.confirm-overlay{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,0.3);z-index:999}
 	.confirm-box{padding:20px 24px;border-radius:15px;background:white;font-size:16px;font-weight:600;color:#555;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:pop 0.3s ease;text-align:center;min-width:260px}
 	.confirm-actions{display:flex;gap:10px;margin-top:18px}
 	.confirm-actions button{flex:1;padding:10px;border:0;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
 	.confirm-cancel{background:gainsboro;color:#555}
 	.confirm-delete{background:#ff6b6b;color:white}
+	.batch-move{background:#6bc5ff;color:#555}
 	@keyframes pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
 	@media (max-width:480px){
 		.app-container{justify-content:center;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
@@ -286,8 +288,8 @@ body{
 			<div class="box box-2" id="btnO2">Ô 2</div>
 			<div class="box box-4" id="btnO4">Phiên âm</div>
 		<div class="word-actions">
-			<button onclick="moveCurrentWord('Chưa thuộc')">Chưa thuộc</button>
-			<button onclick="moveCurrentWord('Đã thuộc')">Đã thuộc</button>
+			<button type="button" data-category="Chưa thuộc">Chưa thuộc</button>
+			<button type="button" data-category="Đã thuộc">Đã thuộc</button>
 		</div>
 		</div>
 
@@ -306,6 +308,18 @@ body{
 			</div>
 		</div>
 	</div>
+	<div class="confirm-overlay" id="batchActionOverlay">
+		<div class="confirm-box">
+			<div id="batchActionTitle">Thao tác với tất cả mục</div>
+			<div class="confirm-actions batch-actions">
+				<button class="confirm-delete" id="batchDeleteButton" type="button">Xóa tất cả</button>
+				<button class="batch-move" id="batchMoveButton" type="button">Di chuyển tất cả</button>
+			</div>
+			<div class="confirm-actions">
+				<button class="confirm-cancel" id="batchCancelButton" type="button">Hủy</button>
+			</div>
+		</div>
+	</div>
 
 
 
@@ -321,6 +335,55 @@ let currentIndex = 0;
 let mode = 'en';
 let showAnswer = false;
 let renderVersion = 0;
+let batchMoveTarget = null;
+
+function setupLongPressActions(){
+	const holdDelay = 600;
+	document.querySelectorAll('.word-actions button[data-category]').forEach(button=>{
+		let holdTimer = null;
+		let suppressClick = false;
+
+		button.addEventListener('pointerdown',()=>{
+			holdTimer = setTimeout(()=>{
+				suppressClick = true;
+				const target = button.dataset.category === 'Đã thuộc' ? 'Chưa thuộc' : 'Đã thuộc';
+				openBatchActionDialog(target);
+			},holdDelay);
+		});
+		const clearHold = ()=>{if(holdTimer){clearTimeout(holdTimer);holdTimer=null;}};
+		button.addEventListener('pointerup',clearHold);
+		button.addEventListener('pointerleave',clearHold);
+		button.addEventListener('pointercancel',clearHold);
+		button.addEventListener('contextmenu',event=>event.preventDefault());
+		button.addEventListener('click',event=>{
+			if(suppressClick){
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				suppressClick = false;
+				return;
+			}
+			moveCurrentWord(button.dataset.category);
+		});
+	});
+	document.getElementById('batchDeleteButton').addEventListener('click',deleteAllCurrentItems);
+	document.getElementById('batchMoveButton').addEventListener('click',moveAllCurrentItems);
+	document.getElementById('batchCancelButton').addEventListener('click',closeBatchActionDialog);
+}
+
+function openBatchActionDialog(targetName){
+	if(!currentList.length) return;
+	batchMoveTarget = targetName;
+	const unit = selectedKind === 'sentence' ? 'câu' : 'từ';
+	document.getElementById('batchActionTitle').innerText = `Chọn thao tác với ${currentList.length} ${unit}`;
+	document.getElementById('batchDeleteButton').innerText = `Xóa tất cả ${unit}`;
+	document.getElementById('batchMoveButton').innerText = `Di chuyển tất cả đến ${targetName.toLowerCase()}`;
+	document.getElementById('batchActionOverlay').style.display = 'flex';
+}
+
+function closeBatchActionDialog(){
+	document.getElementById('batchActionOverlay').style.display = 'none';
+	batchMoveTarget = null;
+}
 
 
 async function renderWord(){
@@ -507,6 +570,55 @@ async function renderWord(){
 		showAnswer=false;renderWord();
 	}
 
+	function getNormalizedCategoryLists(){
+		let lists=[];
+		try{lists=JSON.parse(localStorage.getItem(storageKey)||'[]');}catch{}
+		const names=selectedKind==='sentence'?['Câu mới','Chưa thuộc','Đã thuộc']:['Từ mới','Chưa thuộc','Đã thuộc'];
+		const fixed=names.map((name,i)=>{
+			const found=lists.find(list=>list.name===name)||(selectedKind==='sentence'&&i===0?lists.find(list=>list.name==='Từ mới'):null);
+			return {name,words:Array.isArray(found?.words)?[...found.words]:[]};
+		});
+		lists.filter(list=>!names.includes(list.name)&&!(selectedKind==='sentence'&&list.name==='Từ mới')).forEach(list=>{
+			if(Array.isArray(list.words))fixed[0].words.push(...list.words);
+		});
+		return fixed;
+	}
+
+	function finishBatchAction(){
+		currentList.splice(0,currentList.length);
+		selectedList.words=currentList;
+		localStorage.setItem('selectedList',JSON.stringify(selectedList));
+		currentIndex=0;
+		showAnswer=false;
+		closeBatchActionDialog();
+		renderWord();
+	}
+
+	function deleteAllCurrentItems(){
+		if(!currentList.length){closeBatchActionDialog();return;}
+		const lists=getNormalizedCategoryLists();
+		const sourceName=selectedList?.name||(selectedKind==='sentence'?'Câu mới':'Từ mới');
+		const normalizedSourceName=selectedKind==='sentence'&&sourceName==='Từ mới'?'Câu mới':sourceName;
+		const source=lists.find(list=>list.name===normalizedSourceName);
+		if(source)source.words=[];
+		localStorage.setItem(storageKey,JSON.stringify(lists));
+		finishBatchAction();
+	}
+
+	function moveAllCurrentItems(){
+		if(!currentList.length){closeBatchActionDialog();return;}
+		const lists=getNormalizedCategoryLists();
+		const sourceName=selectedList?.name||(selectedKind==='sentence'?'Câu mới':'Từ mới');
+		const normalizedSourceName=selectedKind==='sentence'&&sourceName==='Từ mới'?'Câu mới':sourceName;
+		const source=lists.find(list=>list.name===normalizedSourceName);
+		const target=lists.find(list=>list.name===batchMoveTarget);
+		if(!source||!target||source===target){closeBatchActionDialog();return;}
+		target.words.push(...source.words);
+		source.words=[];
+		localStorage.setItem(storageKey,JSON.stringify(lists));
+		finishBatchAction();
+	}
+
 	function deleteCurrentItem(){
 		if(!currentList.length) return;
 		const unit=selectedKind==='sentence'?'câu':'từ';
@@ -530,6 +642,8 @@ async function renderWord(){
 		if(currentIndex>=currentList.length)currentIndex=Math.max(0,currentList.length-1);
 		showAnswer=false;closeDeleteConfirm();renderWord();
 	}
+
+	setupLongPressActions();
 
 
 </script>

@@ -217,7 +217,7 @@
 		if(!en.length||!vi.length){alert('Vui lòng nhập ít nhất một từ và một nghĩa');return;}
 		if(en.length!==vi.length){alert('Số dòng không khớp!');return;}
 		let lists=[];try{lists=JSON.parse(localStorage.getItem('wordLists')||'[]');}catch{}
-		const names=['Từ mới','Chưa thuộc','Đã thuộc'];
+		const names=['Từ mới','Chưa thuộc','Đã thuộc','Không học'];
 		const fixed=names.map(name=>{const found=lists.find(list=>list.name===name);return {name,words:Array.isArray(found?.words)?found.words:[]};});
 		lists.filter(list=>!names.includes(list.name)).forEach(list=>{if(Array.isArray(list.words))fixed[0].words.push(...list.words);});
 		for(let i=0;i<en.length;i++)fixed[0].words.push({en:en[i],vi:vi[i]});

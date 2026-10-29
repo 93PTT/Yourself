@@ -220,6 +220,7 @@
 
 </div>
 
+<script src="study-random.js"></script>
 <script>
 
 // =========================
@@ -227,8 +228,8 @@
 // =========================
 let selectedList = JSON.parse(localStorage.getItem('selectedList'));
 const selectedKind = localStorage.getItem('selectedKind') || 'word';
-let currentList = selectedList?.words || [];
-shuffleArray(currentList);
+const queueHistory = createFairStudyQueue(selectedList?.words || [], JSON.stringify(['pronunciation',selectedKind,selectedList?.name||'default']));
+let currentList = queueHistory.items;
 let currentIndex = 0;
 let advanceTimer = null;
 
@@ -244,11 +245,12 @@ function renderWord() {
 
 	if (!currentList.length) {
 		boxVi.innerText = "Không có dữ liệu";
-		boxResult.innerText = "Chọn danh sách từ trước";
+		boxResult.innerText = "Chọn danh sách trước";
 		return;
 	}
 
 	let word = currentList[currentIndex];
+	queueHistory.markSeen(word);
 	boxVi.innerText = word.vi || "";
 	boxResult.innerText = "🔊 Chạm để nghe";
 	boxResult.className = "box-result";
@@ -475,16 +477,6 @@ function backWord() {
 	if (currentIndex > 0) {
 		currentIndex--;
 		renderWord();
-	}
-}
-
-// =========================
-// SHUFFLE
-// =========================
-function shuffleArray(arr) {
-	for (let i = arr.length - 1; i > 0; i--) {
-		let j = Math.floor(Math.random() * (i + 1));
-		[arr[i], arr[j]] = [arr[j], arr[i]];
 	}
 }
 

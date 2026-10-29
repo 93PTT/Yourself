@@ -180,13 +180,13 @@ body{
     </div>
 </div>
 
+<script src="study-random.js"></script>
 <script>
 
 let selectedList = JSON.parse(localStorage.getItem('selectedList'));
 const selectedKind = localStorage.getItem('selectedKind') || 'word';
-let currentList = selectedList?.words || [];
-
-shuffleArray(currentList);
+const queueHistory = createFairStudyQueue(selectedList?.words || [], JSON.stringify(['spelling',selectedKind,selectedList?.name||'default']));
+let currentList = queueHistory.items;
 let currentIndex = 0;
 let isShowingFeedback = false;
 
@@ -200,6 +200,7 @@ function renderWord(){
     }
 
     let word = currentList[currentIndex];
+    queueHistory.markSeen(word);
 
     document.getElementById("btnO1").innerText = word.vi;
 
@@ -265,15 +266,6 @@ function nextWord(){
     }
 
     renderWord();
-}
-
-/* ================= SHUFFLE ================= */
-function shuffleArray(array){
-    if(!array || array.length <= 1) return;
-    for(let i = array.length - 1; i > 0; i--){
-        let j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
 }
 
 /* ================= INIT ================= */

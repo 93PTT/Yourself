@@ -203,8 +203,8 @@
 
 
 <script>
-	const LIST_NAMES = ['Từ mới', 'Chưa thuộc', 'Đã thuộc'];
-	const SENTENCE_LIST_NAMES = ['Câu mới', 'Chưa thuộc', 'Đã thuộc'];
+	const LIST_NAMES = ['Từ mới', 'Chưa thuộc', 'Đã thuộc', 'Không học'];
+	const SENTENCE_LIST_NAMES = ['Câu mới', 'Chưa thuộc', 'Đã thuộc', 'Không học'];
 	let selectedMode = null;
 	let selectedKind = localStorage.getItem('selectedKind') || 'word';
 	function readWordLists(){try{const lists=JSON.parse(localStorage.getItem('wordLists')||'[]');return Array.isArray(lists)?lists:[];}catch{return [];}}
